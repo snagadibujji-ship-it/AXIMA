@@ -319,6 +319,16 @@ class Axima:
         
         # 0. Track topic + detect mood
         self._track_topic(user_input)
+        
+        # 0.05 SELF-LEARNING: Check if we have a cached correct answer
+        try:
+            from self_learning import get_learner
+            _learner = get_learner()
+            cached = _learner.get_cached_answer(user_input)
+            if cached:
+                return {"response": cached, "gap": False}
+        except Exception:
+            pass
         self.mood = self._detect_mood(user_input)
         
         # 0.1 Reference resolution — resolve "it", "that", short follow-ups
@@ -350,6 +360,15 @@ class Axima:
                 _qtype = 'factual'
             else:
                 _qtype = 'general'
+            
+            # Context Gravity: detect domain for better resolution
+            try:
+                from self_learning import get_gravity
+                _grav = get_gravity()
+                _domain = _grav.detect_domain(user_input)
+                # Domain info available for QIR entanglement
+            except Exception:
+                _domain = None
             
             # Get interpretations (non-destructive)
             self._qir_interpretations = self._qir_instance.resolve(user_input, _qtype)
@@ -713,6 +732,28 @@ class Axima:
         try:
             from response_depth import enrich_response
             final = enrich_response(user_input, final)
+        except Exception: pass
+        
+        # 15. Self-Learning: detect errors + cache successes
+        try:
+            from self_learning import get_learner
+            _sl = get_learner()
+            if _sl.detect_error(user_input, final):
+                # Bad answer — log failure, try web search
+                _sl.log_failure(user_input, final)
+                # Don't return garbage — try web or gap
+                try:
+                    web_result = self.search_and_learn(user_input)
+                    if web_result and web_result.get('found'):
+                        final = web_result['answer']
+                        try:
+                            final = enrich_response(user_input, final)
+                        except Exception: pass
+                        _sl.log_success(user_input, final, 'web_recovery')
+                except Exception: pass
+            else:
+                # Good answer — cache it
+                _sl.log_success(user_input, final, 'pipeline')
         except Exception: pass
         
         return {"response": final, "gap": False}
