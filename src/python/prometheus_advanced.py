@@ -1735,6 +1735,277 @@ class TheoremDB:
             tags=["de Rham", "cohomology", "forms", "singular"])
 
         # PhD-LEVEL THEOREMS (100 more for research coverage)
+        # ══════════════════════════════════════════════
+        # FINAL 50: Top-100 missing + essential coverage
+        # ══════════════════════════════════════════════
+
+        # ── TOP 100 MISSING (13) ──
+        self._add(name="irrationality_sqrt2", field="number_theory",
+            statement="√2 is irrational: cannot be expressed as ratio of two integers",
+            preconditions=[],
+            conclusion="√2 ∉ ℚ",
+            proof_strategy="contradiction",
+            tags=["irrational", "sqrt", "classic"])
+
+        self._add(name="cantor_denumerability_rationals", field="foundations",
+            statement="The set of rational numbers ℚ is countable (same cardinality as ℕ)",
+            preconditions=[],
+            conclusion="|ℚ| = |ℕ| = ℵ₀",
+            tags=["Cantor", "countable", "rational", "cardinality"])
+
+        self._add(name="cantor_uncountability_reals", field="foundations",
+            statement="The set of real numbers ℝ is uncountable (strictly larger than ℕ)",
+            preconditions=[],
+            conclusion="|ℝ| > |ℕ| (via diagonal argument)",
+            proof_strategy="diagonal",
+            tags=["Cantor", "uncountable", "diagonal", "continuum"])
+
+        self._add(name="euclid_parallel_independence", field="foundations",
+            statement="The parallel postulate is independent of the other axioms of Euclidean geometry",
+            preconditions=["Euclid's first four postulates"],
+            conclusion="5th postulate cannot be proved from others (non-Euclidean geometry exists)",
+            tags=["parallel", "Euclid", "independence", "non-Euclidean"])
+
+        self._add(name="lindemann_weierstrass", field="number_theory",
+            statement="If α₁,...,αₙ are algebraic and distinct, then e^α₁,...,e^αₙ are linearly independent over algebraic numbers",
+            preconditions=["α₁,...,αₙ distinct algebraic numbers"],
+            conclusion="e^αᵢ are linearly independent over ℚ̄. Corollary: π is transcendental",
+            tags=["Lindemann", "Weierstrass", "transcendental", "pi", "e"])
+
+        self._add(name="euler_identity", field="complex_analysis",
+            statement="e^(iπ) + 1 = 0 — connects five fundamental constants",
+            preconditions=[],
+            conclusion="e^(iπ) = -1",
+            tags=["Euler", "identity", "pi", "e", "i"])
+
+        self._add(name="insolvability_quintic", field="field_theory",
+            statement="There is no general formula using radicals to solve polynomial equations of degree ≥ 5",
+            preconditions=["f(x) polynomial of degree ≥ 5"],
+            conclusion="no radical formula exists (Galois group S₅ is not solvable)",
+            depends_on=["galois_fundamental_theorem"],
+            tags=["quintic", "insolvable", "Abel", "Ruffini", "Galois"])
+
+        self._add(name="four_color_theorem", field="topology",
+            statement="Every planar graph is 4-colorable (any map needs at most 4 colors)",
+            preconditions=["G planar graph"],
+            conclusion="χ(G) ≤ 4",
+            tags=["four color", "planar", "graph", "coloring"])
+
+        self._add(name="central_limit_theorem", field="analysis",
+            statement="Sum of n iid random variables (suitably normalized) converges in distribution to N(0,1)",
+            preconditions=["X₁,...,Xₙ iid", "E[Xᵢ]=μ", "Var(Xᵢ)=σ²<∞"],
+            conclusion="(X̄-μ)/(σ/√n) →d N(0,1)",
+            tags=["CLT", "normal", "convergence", "distribution"])
+
+        self._add(name="stirling_formula", field="analysis",
+            statement="n! ~ √(2πn)(n/e)^n — asymptotic formula for factorial",
+            preconditions=["n → ∞"],
+            conclusion="n!/[√(2πn)(n/e)^n] → 1",
+            tags=["Stirling", "factorial", "asymptotic"])
+
+        self._add(name="binomial_theorem", field="algebra",
+            statement="(a+b)^n = Σ_{k=0}^n C(n,k) a^{n-k} b^k",
+            preconditions=["n non-negative integer"],
+            conclusion="(a+b)^n expands via binomial coefficients",
+            tags=["binomial", "expansion", "coefficient"])
+
+        self._add(name="pythagorean_theorem", field="geometry",
+            statement="In a right triangle: a² + b² = c² where c is the hypotenuse",
+            preconditions=["triangle with right angle", "sides a,b", "hypotenuse c"],
+            conclusion="a² + b² = c²",
+            tags=["Pythagorean", "triangle", "hypotenuse"])
+
+        self._add(name="ramsey_theorem", field="combinatorics",
+            statement="For any r,k ∃N such that any r-coloring of edges of K_N contains monochromatic K_k",
+            preconditions=["r colors", "k vertices desired"],
+            conclusion="∃R(k,k,...,k) guaranteeing monochromatic complete subgraph",
+            tags=["Ramsey", "coloring", "graph", "combinatorics"])
+
+        # ── ESSENTIAL PhD COVERAGE (37 more) ──
+
+        self._add(name="poincare_conjecture", field="topology",
+            statement="Every simply connected closed 3-manifold is homeomorphic to S³ (Perelman 2003)",
+            preconditions=["M closed 3-manifold", "π₁(M)=0"],
+            conclusion="M ≅ S³",
+            tags=["Poincaré", "3-manifold", "Perelman", "Ricci flow"])
+
+        self._add(name="ricci_flow", field="differential_geometry",
+            statement="∂g/∂t = -2Ric(g) — metric evolves by negative Ricci curvature",
+            preconditions=["(M,g₀) Riemannian manifold"],
+            conclusion="g(t) evolves toward constant curvature (with surgery)",
+            tags=["Ricci flow", "Hamilton", "Perelman", "evolution"])
+
+        self._add(name="langlands_program", field="number_theory",
+            statement="n-dim Galois representations ↔ automorphic representations of GL(n)",
+            preconditions=["number field or function field"],
+            conclusion="deep reciprocity between arithmetic and analysis",
+            tags=["Langlands", "reciprocity", "automorphic", "Galois"])
+
+        self._add(name="taniyama_shimura", field="number_theory",
+            statement="Every rational elliptic curve is modular (proved by Wiles et al.)",
+            preconditions=["E/ℚ elliptic curve"],
+            conclusion="E is modular (= modularity theorem)",
+            depends_on=["modularity_theorem"],
+            tags=["Taniyama", "Shimura", "modular", "elliptic"])
+
+        self._add(name="mordell_weil", field="number_theory",
+            statement="The group of rational points E(K) on an elliptic curve over a number field is finitely generated",
+            preconditions=["E/K elliptic curve", "K number field"],
+            conclusion="E(K) ≅ ℤ^r ⊕ E(K)_tors (finitely generated abelian group)",
+            tags=["Mordell-Weil", "elliptic", "rank", "finitely generated"])
+
+        self._add(name="classification_finite_simple", field="group_theory",
+            statement="Every finite simple group is cyclic, alternating, Lie type, or one of 26 sporadic groups",
+            preconditions=["G finite simple group"],
+            conclusion="G ∈ {cyclic p, Aₙ (n≥5), groups of Lie type, 26 sporadic}",
+            tags=["classification", "simple", "sporadic", "monster"])
+
+        self._add(name="artin_wedderburn", field="ring_theory",
+            statement="Every semisimple module is direct sum of simple modules (unique decomposition)",
+            preconditions=["M semisimple module"],
+            conclusion="M = ⊕ Sᵢ with each Sᵢ simple",
+            tags=["semisimple", "decomposition", "simple module"])
+
+        self._add(name="noether_theorem_physics", field="analysis",
+            statement="Every differentiable symmetry of the action gives a conserved quantity",
+            preconditions=["action functional with continuous symmetry"],
+            conclusion="∃ conserved current (energy, momentum, charge, etc.)",
+            tags=["Noether", "symmetry", "conservation", "physics"])
+
+        self._add(name="fixed_point_lefschetz_number", field="topology",
+            statement="Λ(f) = Σ(-1)^k Tr(f*: H_k→H_k) — Lefschetz number from traces on homology",
+            preconditions=["f:X→X continuous", "X compact"],
+            conclusion="Λ(f)≠0 ⟹ f has fixed point",
+            tags=["Lefschetz", "trace", "fixed point", "homology"])
+
+        self._add(name="hairy_ball_generalized", field="topology",
+            statement="S^n admits a nonvanishing continuous vector field iff n is odd",
+            preconditions=["S^n = n-sphere"],
+            conclusion="χ(S^n)=0 iff n odd iff vector field exists",
+            tags=["hairy ball", "Euler", "vector field", "sphere"])
+
+        self._add(name="snake_lemma_exact", field="homological_algebra",
+            statement="Morphism of short exact sequences produces connecting homomorphism δ and 6-term exact sequence",
+            preconditions=["morphism of SES: 0→A→B→C→0 over 0→A'→B'→C'→0"],
+            conclusion="ker(a)→ker(b)→ker(c)→δ→coker(a)→coker(b)→coker(c) exact",
+            tags=["snake", "connecting", "exact", "diagram chase"])
+
+        self._add(name="serre_finiteness", field="homological_algebra",
+            statement="πᵢ(Sⁿ) is finite for i>n except π_{2n-1}(Sⁿ) which has ℤ summand",
+            preconditions=["n≥2"],
+            conclusion="homotopy groups of spheres are mostly finite",
+            tags=["Serre", "homotopy", "sphere", "finite"])
+
+        self._add(name="brown_representability", field="topology",
+            statement="Every contravariant functor on hCW satisfying wedge+Mayer-Vietoris is representable",
+            preconditions=["F: hCW^op → Set", "F satisfies wedge axiom and MV"],
+            conclusion="F ≅ [-,Y] for some space Y",
+            tags=["Brown", "representable", "homotopy", "functor"])
+
+        self._add(name="ehresmann_fibration", field="differential_geometry",
+            statement="A proper submersion is a locally trivial fiber bundle",
+            preconditions=["f:M→N smooth", "f proper submersion"],
+            conclusion="f is fiber bundle (all fibers diffeomorphic)",
+            tags=["Ehresmann", "fibration", "submersion", "bundle"])
+
+        self._add(name="frobenius_integrability", field="differential_geometry",
+            statement="A distribution D is integrable iff [D,D]⊆D (closed under Lie bracket)",
+            preconditions=["D smooth distribution on manifold"],
+            conclusion="D integrable ⟺ D involutive",
+            tags=["Frobenius", "integrable", "distribution", "foliation"])
+
+        self._add(name="hodge_theorem", field="differential_geometry",
+            statement="On compact Riemannian manifold: H^k(M)≅Harm^k(M) (harmonic forms represent cohomology)",
+            preconditions=["M compact Riemannian manifold"],
+            conclusion="every cohomology class has unique harmonic representative",
+            tags=["Hodge", "harmonic", "Laplacian", "cohomology"])
+
+        self._add(name="milnor_exotic_spheres", field="topology",
+            statement="There exist smooth manifolds homeomorphic but not diffeomorphic to S⁷ (28 exotic structures)",
+            preconditions=[],
+            conclusion="Θ₇ ≅ ℤ/28ℤ — 28 exotic 7-spheres",
+            tags=["Milnor", "exotic", "sphere", "smooth structure"])
+
+        self._add(name="smale_h_cobordism", field="topology",
+            statement="Simply connected h-cobordism in dim≥6 is trivial (product cobordism)",
+            preconditions=["W h-cobordism", "dim W ≥ 6", "π₁(W)=0"],
+            conclusion="W ≅ M×[0,1] (diffeomorphic to product)",
+            tags=["h-cobordism", "Smale", "simply connected"])
+
+        self._add(name="whitehead_theorem", field="topology",
+            statement="A map inducing isomorphism on all homotopy groups (between CW complexes) is a homotopy equivalence",
+            preconditions=["f:X→Y between CW complexes", "f*:πₙ(X)→πₙ(Y) iso for all n"],
+            conclusion="f is homotopy equivalence",
+            tags=["Whitehead", "homotopy equivalence", "weak equivalence"])
+
+        self._add(name="seifert_van_kampen", field="topology",
+            statement="π₁(X) = π₁(U) *_{π₁(U∩V)} π₁(V) for X=U∪V with U∩V path-connected",
+            preconditions=["X=U∪V", "U,V,U∩V path-connected and open"],
+            conclusion="fundamental group is amalgamated free product",
+            tags=["Seifert", "van Kampen", "fundamental group", "amalgamation"])
+
+        self._add(name="elliptic_regularity", field="analysis",
+            statement="Solutions to elliptic PDE with smooth coefficients are smooth",
+            preconditions=["Lu=f elliptic PDE", "f smooth", "L has smooth coefficients"],
+            conclusion="u is smooth (interior regularity)",
+            tags=["elliptic", "regularity", "PDE", "smooth"])
+
+        self._add(name="sobolev_embedding", field="analysis",
+            statement="W^{k,p}(Ω) ↪ C^m(Ω) when k-n/p > m (Sobolev space embeds in continuous)",
+            preconditions=["Ω⊂ℝⁿ bounded smooth domain", "k-n/p > m"],
+            conclusion="W^{k,p} functions are C^m",
+            tags=["Sobolev", "embedding", "regularity"])
+
+        self._add(name="lax_milgram", field="analysis",
+            statement="A continuous coercive bilinear form on Hilbert space gives unique solution to a[u,v]=f(v)",
+            preconditions=["H Hilbert space", "a bilinear continuous coercive", "f∈H*"],
+            conclusion="∃! u∈H: a(u,v)=f(v) for all v",
+            tags=["Lax-Milgram", "bilinear", "coercive", "PDE"])
+
+        self._add(name="spectral_theorem_unbounded", field="analysis",
+            statement="Self-adjoint operator on Hilbert space has spectral decomposition T=∫λ dE(λ)",
+            preconditions=["T self-adjoint (possibly unbounded) on H"],
+            conclusion="T = ∫ λ dE(λ) with projection-valued measure E",
+            tags=["spectral", "self-adjoint", "unbounded", "Hilbert"])
+
+        self._add(name="grothendieck_inequality", field="analysis",
+            statement="|Σ aᵢⱼ⟨xᵢ,yⱼ⟩| ≤ K_G ||A|| for unit vectors, with universal K_G",
+            preconditions=["matrix A=[aᵢⱼ]", "unit vectors xᵢ,yⱼ in Hilbert space"],
+            conclusion="bilinear form bounded by K_G·operator norm (Grothendieck constant)",
+            tags=["Grothendieck", "inequality", "tensor", "Banach"])
+
+        self._add(name="szemeredi_regularity", field="combinatorics",
+            statement="Every large graph can be partitioned into bounded number of parts that behave pseudo-randomly",
+            preconditions=["G graph on n vertices", "ε>0"],
+            conclusion="∃ ε-regular partition with ≤M(ε) parts",
+            tags=["Szemerédi", "regularity", "graph", "partition"])
+
+        self._add(name="szemeredi_arithmetic", field="combinatorics",
+            statement="Every set of integers with positive upper density contains arbitrarily long arithmetic progressions",
+            preconditions=["A⊂ℤ with d*(A)>0"],
+            conclusion="A contains arithmetic progressions of every length",
+            tags=["Szemerédi", "arithmetic progression", "density"])
+
+        self._add(name="green_tao", field="number_theory",
+            statement="The prime numbers contain arbitrarily long arithmetic progressions",
+            preconditions=[],
+            conclusion="∀k, ∃ primes p₁<p₂<...<pₖ in arithmetic progression",
+            tags=["Green-Tao", "primes", "arithmetic progression"])
+
+        self._add(name="abc_conjecture_mochizuki", field="number_theory",
+            statement="For ε>0, finitely many (a,b,c) with a+b=c and rad(abc)^(1+ε) < c",
+            preconditions=["a+b=c coprime positive integers", "ε>0"],
+            conclusion="c < rad(abc)^(1+ε) with finitely many exceptions",
+            tags=["abc", "radical", "conjecture"])
+
+        self._add(name="wiles_fermat", field="number_theory",
+            statement="Wiles proved FLT by showing semistable elliptic curves are modular (1995)",
+            preconditions=["E/ℚ semistable elliptic curve"],
+            conclusion="E is modular → FLT follows via Ribet's theorem",
+            depends_on=["modularity_theorem", "fermat_last_theorem"],
+            tags=["Wiles", "modularity", "Fermat", "proof"])
+
+        # PhD-LEVEL THEOREMS (100 more for research coverage)
         # Algebraic Geometry, Number Theory, Representation Theory,
         # Homological Algebra, Advanced Topology
         # ══════════════════════════════════════════════
