@@ -2236,7 +2236,9 @@ class PhysicsIdentifier:
             "coulomb", "lorentz", "electromagnetic", "radiation", "antenna",
             "wave", "polariz", "refract", "reflect", "lens", "mirror",
             "diffract", "interfer", "circuit", "ohm", "dielectric",
-            "dipole", "flux", "emf", "transformer", "impedance", "waveguide"
+            "dipole", "flux", "emf", "transformer", "impedance", "waveguide",
+            "skin depth", "copper", "fresnel", "snell", "kramers",
+            "kronig", "dispersion", "optic"
         ],
         "quantum_mechanics": [
             "quantum", "wavefunction", "schrodinger", "schrödinger", "operator",
@@ -2245,7 +2247,12 @@ class PhysicsIdentifier:
             "observable", "measurement", "probability amplitude", "tunneling",
             "harmonic oscillator", "hydrogen atom", "orbital", "photon",
             "planck", "bohr", "de broglie", "wave-particle", "qubit",
-            "decoherence", "bell", "EPR", "density matrix"
+            "decoherence", "bell", "EPR", "density matrix", "perturbation",
+            "variational", "WKB", "bound state", "selection rule",
+            "clebsch", "gordan", "angular momentum", "berry phase",
+            "no-cloning", "cloning theorem", "path integral",
+            "fermi golden", "golden rule", "anharmonic",
+            "ground state energy", "expectation value"
         ],
         "statistical_mechanics": [
             "entropy", "temperature", "thermodynamic", "heat", "boltzmann",
@@ -2254,7 +2261,10 @@ class PhysicsIdentifier:
             "grand canonical", "equipartition", "specific heat", "latent",
             "carnot", "efficiency", "reversible", "irreversible", "adiabatic",
             "isothermal", "isobaric", "blackbody", "stefan", "planck radiation",
-            "ising", "mean field", "order parameter", "condensat"
+            "ising", "mean field", "order parameter", "condensat",
+            "renormalization group", "critical phenomena", "clausius",
+            "clapeyron", "jarzynski", "non-equilibrium", "mixing",
+            "Wien", "peak wavelength", "radiation spectrum"
         ],
         "relativity": [
             "relativity", "relativistic", "lorentz", "spacetime", "metric",
@@ -2263,7 +2273,9 @@ class PhysicsIdentifier:
             "time dilation", "length contraction", "twin paradox", "E=mc",
             "four-vector", "tensor", "einstein field", "cosmolog", "hubble",
             "expansion", "redshift", "dark energy", "inflation", "friedmann",
-            "big bang", "CMB", "hawking"
+            "big bang", "CMB", "hawking", "neutron star", "mercury",
+            "precession", "perihelion", "deflection", "gravitational redshift",
+            "general relativity", "special relativity", "light bending"
         ],
         "quantum_field_theory": [
             "feynman diagram", "propagator", "vertex", "renormaliz",
@@ -2271,7 +2283,9 @@ class PhysicsIdentifier:
             "quark", "lepton", "gluon", "W boson", "Z boson", "neutrino",
             "cross section", "decay rate", "coupling constant", "running",
             "asymptotic freedom", "confinement", "anomaly", "gauge",
-            "symmetry breaking", "goldstone", "CKM", "PMNS", "flavor"
+            "symmetry breaking", "goldstone", "CKM", "PMNS", "flavor",
+            "coleman", "mandula", "supersymmetry", "SUSY",
+            "oscillation", "compton", "muon g-2"
         ],
         "condensed_matter": [
             "crystal", "lattice", "phonon", "band", "semiconductor",
@@ -2279,18 +2293,25 @@ class PhysicsIdentifier:
             "topological", "insulator", "hall effect", "fermi surface",
             "bloch", "brillouin", "doping", "transistor", "diode",
             "magnetism", "ferromagnet", "antiferromagnet", "magnon",
-            "kondo", "hubbard", "strongly correlated", "metal"
+            "kondo", "hubbard", "strongly correlated", "metal",
+            "anderson localization", "debye", "specific heat",
+            "kohn-sham", "DFT", "density functional",
+            "laughlin", "fractional", "landau level",
+            "gap equation"
         ],
         "quantum_optics": [
             "laser", "photon", "coherent state", "squeezed", "cavity QED",
             "single photon", "entangled photon", "beam splitter",
             "nonlinear optic", "second harmonic", "parametric",
-            "quantum key", "QKD", "antibunching"
+            "quantum key", "QKD", "antibunching",
+            "jaynes", "cummings", "rabi", "purcell",
+            "hong-ou-mandel", "down-conversion"
         ],
         "plasma_physics": [
             "plasma", "MHD", "magnetohydro", "fusion", "tokamak",
             "alfven", "cyclotron", "reconnection", "solar wind",
-            "corona", "ionosphere"
+            "corona", "ionosphere", "vlasov", "landau damping",
+            "collisionless"
         ],
         "nuclear_physics": [
             "nuclear", "nucleus", "fission", "fusion", "radioactive",
@@ -2302,7 +2323,18 @@ class PhysicsIdentifier:
             "universe", "cosmology", "dark matter", "dark energy",
             "big bang", "inflation", "CMB", "hubble", "redshift",
             "expansion", "DESI", "supernova", "neutron star",
-            "pulsar", "quasar", "galaxy", "black hole"
+            "pulsar", "quasar", "galaxy", "black hole",
+            "baryogenesis", "sakharov", "age of universe",
+            "distance ladder", "reionization"
+        ],
+        "research_frontier": [
+            "AdS/CFT", "holograph", "amplituhedron", "ER=EPR",
+            "swampland", "eigenstate thermalization", "ETH",
+            "many-body localization", "MBL", "fracton",
+            "floquet", "time crystal", "measurement-induced",
+            "tensor network", "MERA", "celestial",
+            "SYK", "sachdev", "quantum supremacy",
+            "information paradox", "page curve", "island formula"
         ],
     }
 
