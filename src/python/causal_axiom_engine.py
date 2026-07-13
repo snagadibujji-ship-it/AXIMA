@@ -941,9 +941,11 @@ class CausalAxiomEngine:
             self._queries_answered += 1
             return self._cache[cache_key]
         
-        # ─── PRE-PROCESSING: strip possessives, plurals, articles ───
+        # ─── PRE-PROCESSING: strip possessives, plurals, articles, adjectives ───
         import re as _re
         obj_name = _re.sub(r'^(my|your|his|her|its|our|their|this|that|these|those|some) ', '', obj_name)
+        # Strip common adjectives that don't change material properties
+        obj_name = _re.sub(r'^(raw|hot|cold|warm|frozen|wet|dry|old|new|big|small|large|tiny|huge|thin|thick|heavy|light|clean|dirty|fresh|stale|rotten|spoiled|cooked|uncooked|boiled|fried|baked) ', '', obj_name)
         # Try singular if not found
         obj_singular = obj_name.rstrip('s') if obj_name.endswith('s') and not obj_name.endswith('ss') else obj_name
         if obj_name.endswith('es') and len(obj_name) > 4:

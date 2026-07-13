@@ -328,7 +328,8 @@ class Axima:
         # 0.2 SEMANTIC BRAIN — Field Theory understanding
         # Resolves misspellings, identifies entities, detects intent
         self._forces = None
-        if self._semantic_brain and '. ' not in user_input:
+        _is_causal = any(p in user_input.lower() for p in ['what happens if', 'what would happen', 'what if you', 'what if i'])
+        if self._semantic_brain and '. ' not in user_input and not _is_causal:
             try:
                 self._forces = self._semantic_brain.understand(user_input)
                 # If brain found the entity with high confidence and it differs from input,
