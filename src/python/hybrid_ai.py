@@ -354,14 +354,22 @@ class Axima:
             # Get interpretations (non-destructive)
             self._qir_interpretations = self._qir_instance.resolve(user_input, _qtype)
             
-            # Use best interpretation as the working input
+            # Use best interpretation ONLY if it's a minor correction (1-2 words changed)
             if self._qir_interpretations:
                 best = self._qir_interpretations[0]
-                if best.text != user_input.lower() and best.total_confidence > 0.7:
-                    user_input = best.text
-                    # Restore capitalization of first char if original had it
-                    if user_input and user_input[0].islower():
-                        user_input = user_input[0].upper() + user_input[1:]
+                original_lower = user_input.lower()
+                if (best.text != original_lower 
+                    and best.total_confidence > 0.85
+                    and '. ' not in user_input):  # never touch multi-sentence
+                    # Count how many words changed
+                    orig_words = original_lower.split()
+                    best_words = best.text.split()
+                    if len(orig_words) == len(best_words):
+                        changes = sum(1 for a, b in zip(orig_words, best_words) if a != b)
+                        if changes <= 2:  # max 2 words corrected
+                            user_input = best.text
+                            if user_input and user_input[0].islower():
+                                user_input = user_input[0].upper() + user_input[1:]
         except Exception:
             pass
         
@@ -501,7 +509,9 @@ class Axima:
                     return {"response": debate_resp, "gap": False}
         except Exception: pass
 
-        # 4.5 KDA Query — Check abstracted knowledge BEFORE C engine
+        # 4.5 KDA Query — DISABLED (raw triples pollute answers, CSE handles this better)
+        if False:  # KDA disabled
+            pass
         if query_kda:
             # Use Semantic Brain entities if available, else fallback to naive split
             subjects = []
