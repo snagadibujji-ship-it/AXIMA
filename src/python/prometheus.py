@@ -1414,6 +1414,36 @@ class Prometheus:
                         return f"({a} - {int(sq)}i)({a} + {int(sq)}i)  [over ℂ]"
                     return f"({a} - √{int(val)}·i)({a} + √{int(val)}·i)  [over ℂ]"
 
+        # x^3 - a^3 → (x-a)(x²+ax+a²) [difference of cubes]
+        if isinstance(simplified, BinOp) and simplified.op == '-':
+            if isinstance(simplified.left, BinOp) and simplified.left.op == '^' and \
+               isinstance(simplified.left.right, NumNode) and simplified.left.right.value == 3:
+                a_str = self.printer.to_string(simplified.left.left)
+                if isinstance(simplified.right, NumNode):
+                    val = simplified.right.value
+                    cbrt = round(val ** (1/3))
+                    if abs(cbrt**3 - val) < 0.01:
+                        return f"({a_str} - {int(cbrt)})({a_str}² + {int(cbrt)}{a_str} + {int(cbrt**2)})"
+                elif isinstance(simplified.right, BinOp) and simplified.right.op == '^' and \
+                     isinstance(simplified.right.right, NumNode) and simplified.right.right.value == 3:
+                    b_str = self.printer.to_string(simplified.right.left)
+                    return f"({a_str} - {b_str})({a_str}² + {a_str}{b_str} + {b_str}²)"
+
+        # x^3 + a^3 → (x+a)(x²-ax+a²) [sum of cubes]
+        if isinstance(simplified, BinOp) and simplified.op == '+':
+            if isinstance(simplified.left, BinOp) and simplified.left.op == '^' and \
+               isinstance(simplified.left.right, NumNode) and simplified.left.right.value == 3:
+                a_str = self.printer.to_string(simplified.left.left)
+                if isinstance(simplified.right, NumNode):
+                    val = simplified.right.value
+                    cbrt = round(val ** (1/3))
+                    if abs(cbrt**3 - val) < 0.01:
+                        return f"({a_str} + {int(cbrt)})({a_str}² - {int(cbrt)}{a_str} + {int(cbrt**2)})"
+                elif isinstance(simplified.right, BinOp) and simplified.right.op == '^' and \
+                     isinstance(simplified.right.right, NumNode) and simplified.right.right.value == 3:
+                    b_str = self.printer.to_string(simplified.right.left)
+                    return f"({a_str} + {b_str})({a_str}² - {a_str}{b_str} + {b_str}²)"
+
         # Quadratic: ax^2 + bx + c → a(x-r1)(x-r2)
         var = 'x'
         tokens_f = self.tokenizer.tokenize(text)

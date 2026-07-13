@@ -486,6 +486,218 @@ class TheoremDB:
             conclusion="∃P: P⁻¹AP = J (Jordan blocks)",
             tags=["Jordan", "canonical", "similar"])
 
+        # ══════════════════════════════════════════════
+        # ADDITIONAL THEOREMS (to reach 100+)
+        # ══════════════════════════════════════════════
+
+        # More Group Theory
+        self._add(name="class_equation", field="group_theory",
+            statement="|G| = |Z(G)| + Σ[G:C_G(x)] summed over representatives of non-central conjugacy classes",
+            preconditions=["G is finite group"],
+            conclusion="|G| = |Z(G)| + Σ|conjugacy classes|",
+            tags=["conjugacy", "center", "counting"])
+
+        self._add(name="commutator_subgroup", field="group_theory",
+            statement="G' = [G,G] is the smallest normal subgroup with abelian quotient",
+            preconditions=["G is a group"],
+            conclusion="G/G' is abelian, and G' is minimal with this property",
+            tags=["commutator", "abelian", "quotient"])
+
+        self._add(name="alternating_simple", field="group_theory",
+            statement="Aₙ is simple for n≥5",
+            preconditions=["n ≥ 5"],
+            conclusion="Aₙ has no proper normal subgroups",
+            tags=["simple", "alternating", "permutation"])
+
+        self._add(name="frattini_argument", field="group_theory",
+            statement="If N⊴G and P is Sylow p-subgroup of N, then G = N·N_G(P)",
+            preconditions=["N⊴G", "P Sylow p-subgroup of N"],
+            conclusion="G = N · N_G(P)",
+            depends_on=["sylow_conjugate"],
+            tags=["Frattini", "normalizer", "Sylow"])
+
+        self._add(name="schur_zassenhaus", field="group_theory",
+            statement="If N⊴G with gcd(|N|,[G:N])=1, then G=N⋊H for some H",
+            preconditions=["N⊴G", "gcd(|N|,[G:N])=1"],
+            conclusion="N has a complement: G splits as semidirect product",
+            tags=["complement", "split", "semidirect"])
+
+        # More Ring Theory
+        self._add(name="krull_intersection", field="ring_theory",
+            statement="In a Noetherian local ring, ∩ mⁿ = (0)",
+            preconditions=["R Noetherian local ring", "m maximal ideal"],
+            conclusion="∩_{n≥1} mⁿ = 0",
+            tags=["Noetherian", "local", "intersection"])
+
+        self._add(name="nakayama", field="ring_theory",
+            statement="If M is finitely generated over local ring R and mM=M, then M=0",
+            preconditions=["R local", "M finitely generated", "mM=M"],
+            conclusion="M = 0",
+            tags=["Nakayama", "local", "module"])
+
+        self._add(name="gauss_lemma", field="ring_theory",
+            statement="Primitive polynomial times primitive polynomial is primitive",
+            preconditions=["f,g ∈ ℤ[x] primitive"],
+            conclusion="fg is primitive",
+            tags=["primitive", "polynomial", "content"])
+
+        self._add(name="noether_normalization", field="ring_theory",
+            statement="Every finitely generated k-algebra is integral over a polynomial subring",
+            preconditions=["A finitely generated k-algebra"],
+            conclusion="∃ algebraically independent y₁,...,yₙ: A integral over k[y₁,...,yₙ]",
+            tags=["Noether", "normalization", "algebra"])
+
+        # More Analysis
+        self._add(name="arzela_ascoli", field="analysis",
+            statement="A subset of C(X) is compact iff it is closed, bounded, and equicontinuous",
+            preconditions=["X compact metric space", "F ⊆ C(X)"],
+            conclusion="F compact ⟺ F closed, bounded, equicontinuous",
+            tags=["compact", "equicontinuous", "function space"])
+
+        self._add(name="stone_weierstrass", field="analysis",
+            statement="Subalgebra of C(X) that separates points and contains constants is dense",
+            preconditions=["X compact Hausdorff", "A subalgebra of C(X)", "A separates points", "1∈A"],
+            conclusion="A is dense in C(X)",
+            tags=["approximation", "dense", "polynomial"])
+
+        self._add(name="banach_fixed_point", field="analysis",
+            statement="A contraction on a complete metric space has a unique fixed point",
+            preconditions=["(X,d) complete metric space", "f:X→X contraction"],
+            conclusion="∃! x: f(x)=x",
+            tags=["fixed point", "contraction", "complete"])
+
+        self._add(name="dominated_convergence", field="analysis",
+            statement="If |fₙ|≤g with g integrable and fₙ→f pointwise, then ∫fₙ→∫f",
+            preconditions=["|fₙ|≤g", "g integrable", "fₙ→f pointwise"],
+            conclusion="lim ∫fₙ = ∫ lim fₙ",
+            tags=["Lebesgue", "convergence", "integral"])
+
+        self._add(name="open_mapping", field="analysis",
+            statement="A surjective bounded linear map between Banach spaces is an open map",
+            preconditions=["T:X→Y bounded linear", "X,Y Banach", "T surjective"],
+            conclusion="T is an open map",
+            tags=["Banach", "open", "linear"])
+
+        self._add(name="closed_graph", field="analysis",
+            statement="A closed linear map between Banach spaces is bounded",
+            preconditions=["T:X→Y linear", "X,Y Banach", "graph(T) closed"],
+            conclusion="T is bounded",
+            tags=["Banach", "closed", "bounded"])
+
+        self._add(name="hahn_banach", field="analysis",
+            statement="A bounded linear functional on a subspace extends to the whole space",
+            preconditions=["X normed space", "M subspace", "f∈M*"],
+            conclusion="∃F∈X*: F|_M = f and ||F||=||f||",
+            tags=["extension", "functional", "dual"])
+
+        self._add(name="riesz_representation", field="analysis",
+            statement="Every bounded linear functional on a Hilbert space is an inner product with some vector",
+            preconditions=["H Hilbert space", "f∈H*"],
+            conclusion="∃y∈H: f(x)=⟨x,y⟩ for all x",
+            tags=["Hilbert", "functional", "representation"])
+
+        # More Topology
+        self._add(name="baire_category", field="topology",
+            statement="A complete metric space cannot be written as countable union of nowhere-dense sets",
+            preconditions=["X complete metric space"],
+            conclusion="X is not meager (Baire space)",
+            tags=["Baire", "category", "complete"])
+
+        self._add(name="hairy_ball", field="topology",
+            statement="There is no continuous nonvanishing tangent vector field on S²",
+            preconditions=["S² = 2-sphere"],
+            conclusion="every continuous vector field on S² vanishes somewhere",
+            tags=["vector field", "sphere", "fixed point"])
+
+        self._add(name="jordan_curve", field="topology",
+            statement="A simple closed curve in ℝ² divides the plane into exactly 2 connected components",
+            preconditions=["C simple closed curve in ℝ²"],
+            conclusion="ℝ²\\C has exactly 2 components (interior and exterior)",
+            tags=["curve", "connected", "plane"])
+
+        self._add(name="euler_formula_polyhedra", field="topology",
+            statement="For convex polyhedron: V-E+F=2",
+            preconditions=["P convex polyhedron"],
+            conclusion="V - E + F = 2",
+            tags=["Euler", "polyhedron", "formula"])
+
+        self._add(name="covering_space_lifting", field="topology",
+            statement="Paths and homotopies lift uniquely to covering spaces",
+            preconditions=["p:E→B covering map", "γ path in B"],
+            conclusion="∃! lift γ̃ in E with p∘γ̃ = γ (given starting point)",
+            tags=["covering", "lifting", "path"])
+
+        # Number Theory
+        self._add(name="fermat_little", field="number_theory",
+            statement="If p is prime and p∤a, then a^(p-1) ≡ 1 (mod p)",
+            preconditions=["p prime", "gcd(a,p)=1"],
+            conclusion="a^(p-1) ≡ 1 (mod p)",
+            tags=["Fermat", "prime", "congruence"])
+
+        self._add(name="euler_theorem", field="number_theory",
+            statement="If gcd(a,n)=1, then a^φ(n) ≡ 1 (mod n)",
+            preconditions=["gcd(a,n)=1"],
+            conclusion="a^φ(n) ≡ 1 (mod n)",
+            depends_on=["fermat_little"],
+            tags=["Euler", "totient", "congruence"])
+
+        self._add(name="wilson", field="number_theory",
+            statement="p is prime iff (p-1)! ≡ -1 (mod p)",
+            preconditions=["p ≥ 2"],
+            conclusion="p prime ⟺ (p-1)! ≡ -1 (mod p)",
+            tags=["Wilson", "prime", "factorial"])
+
+        self._add(name="fundamental_arithmetic", field="number_theory",
+            statement="Every integer >1 has a unique prime factorization",
+            preconditions=["n > 1 integer"],
+            conclusion="n = p₁^a₁ · p₂^a₂ · ... · pₖ^aₖ (unique up to order)",
+            tags=["factorization", "unique", "prime"])
+
+        self._add(name="infinitude_primes_arithmetic", field="number_theory",
+            statement="There are infinitely many primes ≡ a (mod n) when gcd(a,n)=1",
+            preconditions=["gcd(a,n)=1"],
+            conclusion="infinitely many primes in arithmetic progression",
+            tags=["Dirichlet", "primes", "arithmetic progression"])
+
+        # Complex Analysis
+        self._add(name="cauchy_integral_formula", field="complex_analysis",
+            statement="f(a) = (1/2πi)∮_C f(z)/(z-a) dz for f holomorphic inside C",
+            preconditions=["f holomorphic inside C", "a inside C"],
+            conclusion="f(a) = (1/2πi)∮ f(z)/(z-a) dz",
+            tags=["Cauchy", "integral", "holomorphic"])
+
+        self._add(name="liouville", field="complex_analysis",
+            statement="Every bounded entire function is constant",
+            preconditions=["f:ℂ→ℂ holomorphic", "f bounded"],
+            conclusion="f is constant",
+            depends_on=["cauchy_integral_formula"],
+            tags=["bounded", "entire", "constant"])
+
+        self._add(name="fundamental_algebra", field="complex_analysis",
+            statement="Every non-constant polynomial over ℂ has a root",
+            preconditions=["p(z) polynomial of degree ≥1 over ℂ"],
+            conclusion="∃z₀: p(z₀)=0",
+            depends_on=["liouville"],
+            tags=["polynomial", "root", "fundamental"])
+
+        self._add(name="residue_theorem", field="complex_analysis",
+            statement="∮_C f(z)dz = 2πi · Σ Res(f, aₖ) for isolated singularities inside C",
+            preconditions=["f meromorphic inside C", "aₖ poles inside C"],
+            conclusion="∮f = 2πi · sum of residues",
+            tags=["residue", "pole", "integral"])
+
+        self._add(name="maximum_modulus", field="complex_analysis",
+            statement="If f is holomorphic on a domain, |f| cannot have a local maximum inside",
+            preconditions=["f holomorphic on domain D"],
+            conclusion="|f| attains maximum only on boundary ∂D",
+            tags=["maximum", "holomorphic", "boundary"])
+
+        self._add(name="identity_theorem", field="complex_analysis",
+            statement="If two holomorphic functions agree on a set with limit point, they are equal everywhere",
+            preconditions=["f,g holomorphic on connected D", "f=g on set with limit point in D"],
+            conclusion="f=g on all of D",
+            tags=["identity", "holomorphic", "uniqueness"])
+
     def stats(self) -> Dict:
         fields = {}
         for t in self.theorems.values():

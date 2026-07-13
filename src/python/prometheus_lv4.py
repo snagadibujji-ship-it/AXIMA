@@ -368,10 +368,11 @@ class StructureBuilder:
     def build_group(self, properties: List[str]) -> Optional[Dict]:
         """Build a group satisfying given properties."""
         order = self._extract_order(properties)
-        is_abelian = 'abelian' in ' '.join(properties).lower()
-        not_abelian = 'non-abelian' in ' '.join(properties).lower() or 'not abelian' in ' '.join(properties).lower()
-        is_cyclic = 'cyclic' in ' '.join(properties).lower()
-        is_simple = 'simple' in ' '.join(properties).lower()
+        props_str = ' '.join(properties).lower()
+        not_abelian = 'non-abelian' in props_str or 'not abelian' in props_str
+        is_abelian = 'abelian' in props_str and not not_abelian
+        is_cyclic = 'cyclic' in props_str
+        is_simple = 'simple' in props_str
 
         from prometheus_lv3 import Group
 
