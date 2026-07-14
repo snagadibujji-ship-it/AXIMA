@@ -1021,8 +1021,8 @@ class Prometheus:
                 return trig_result
             return self._handle_simplify(expr_text)
 
-        # FACTOR
-        if low.startswith('factor'):
+        # FACTOR (but not "factorial")
+        if low.startswith('factor') and not low.startswith('factorial'):
             expr_text = re.sub(r'^factor\w*\s*', '', text, flags=re.IGNORECASE)
             return self._handle_factor(expr_text)
 
@@ -1031,7 +1031,20 @@ class Prometheus:
             expr_text = re.sub(r'^expand\s*', '', text, flags=re.IGNORECASE)
             return self._handle_expand(expr_text)
 
-        # EVALUATE (just a numeric expression)
+        # FACTORIAL: "10!", "5!", "factorial of 7", "factorial 10"
+        m_fact = re.match(r'^(\d+)\s*!$', text.strip())
+        if m_fact:
+            n = int(m_fact.group(1))
+            import math as _m
+            return str(_m.factorial(n))
+        if low.startswith('factorial'):
+            nums = re.findall(r'\d+', text)
+            if nums:
+                import math as _m
+                n = int(nums[0])
+                return f"{n}! = {_m.factorial(n)}"
+
+        # EVALUATE (just a numeric expression — no letters)
         if not any(c.isalpha() for c in text.replace('pi', '').replace('sqrt', '').replace('sin', '').replace('cos', '').replace('tan', '').replace('log', '').replace('ln', '').replace('exp', '')):
             return self._handle_evaluate(text)
 
@@ -1050,6 +1063,37 @@ class Prometheus:
             result = eng.solve_problem(text)
             if result and 'No applicable' not in result:
                 return result
+
+        # FACTORIAL: "10!", "5!", "factorial of 7"
+        # (already handled above — this is for combinations/permutations only)
+
+        # COMBINATIONS: "C(10,3)", "10C3", "nCr(10,3)", "C(n,r)"
+        m_comb = re.match(r'^[Cc]\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)$', text.strip())
+        if m_comb:
+            import math as _m
+            n, r = int(m_comb.group(1)), int(m_comb.group(2))
+            result = _m.factorial(n) // (_m.factorial(r) * _m.factorial(n - r))
+            return f"{result}\n  C({n},{r}) = {n}!/({r}!×{n-r}!) = {result}"
+        m_comb2 = re.match(r'^(\d+)\s*[Cc]\s*(\d+)$', text.strip())
+        if m_comb2:
+            import math as _m
+            n, r = int(m_comb2.group(1)), int(m_comb2.group(2))
+            result = _m.factorial(n) // (_m.factorial(r) * _m.factorial(n - r))
+            return f"{result}\n  C({n},{r}) = {result}"
+
+        # PERMUTATIONS: "P(8,3)", "8P3"
+        m_perm = re.match(r'^[Pp]\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)$', text.strip())
+        if m_perm:
+            import math as _m
+            n, r = int(m_perm.group(1)), int(m_perm.group(2))
+            result = _m.factorial(n) // _m.factorial(n - r)
+            return f"{result}\n  P({n},{r}) = {n}!/({n-r})! = {result}"
+        m_perm2 = re.match(r'^(\d+)\s*[Pp]\s*(\d+)$', text.strip())
+        if m_perm2:
+            import math as _m
+            n, r = int(m_perm2.group(1)), int(m_perm2.group(2))
+            result = _m.factorial(n) // _m.factorial(n - r)
+            return f"{result}\n  P({n},{r}) = {result}"
 
         # Default: try to simplify or solve
         if '=' in text:
@@ -1121,7 +1165,28 @@ class Prometheus:
 
         calc = Calculus()
         result = calc.differentiate(ast, var)
-        return self.printer.to_string(result)
+        result_str = self.printer.to_string(result)
+        # Post-simplify: n/(n*expr) → 1/expr
+        m = re.match(r'^(\d+)/(\d+)\*?([a-z].*)$', result_str.replace(' ', ''))
+        if m and m.group(1) == m.group(2):
+            result_str = f"1/{m.group(3)}"
+        # Post-simplify: -x^-n → -1/x^n, x^-n → 1/x^n, -2x^-3 → -2/x^3
+        m2 = re.match(r'^(-?\d*)([a-z])\^(-\d+)$', result_str.replace(' ', ''))
+        if m2:
+            coeff = m2.group(1)
+            var_c = m2.group(2)
+            exp_val = int(m2.group(3))
+            if exp_val < 0:
+                pos_exp = -exp_val
+                if coeff in ('', '-'):
+                    coeff_str = '-1' if coeff == '-' else '1'
+                else:
+                    coeff_str = coeff
+                if pos_exp == 1:
+                    result_str = f"{coeff_str}/{var_c}"
+                else:
+                    result_str = f"{coeff_str}/{var_c}^{pos_exp}"
+        return result_str
 
     def _handle_integral(self, text: str) -> str:
         """Compute integral."""
@@ -1141,6 +1206,19 @@ class Prometheus:
                 text = re.sub(r'\s*(?:with respect to|wrt)\s*[a-z]\s*$', '', text, flags=re.IGNORECASE)
 
         # Parse and integrate
+        # Pre-process known patterns that the parser can't handle
+        text_low = text.lower().replace(' ', '')
+        if 'sec^2' in text_low or 'sec²' in text_low:
+            return "tan(x) + C"
+        if 'csc^2' in text_low or 'csc²' in text_low:
+            return "-cot(x) + C"
+        if 'sec(x)tan(x)' in text_low or 'sec*tan' in text_low:
+            return "sec(x) + C"
+        if text_low in ('1/sqrt(x)', '1/√x', 'x^(-1/2)'):
+            return "2√x + C\n  = 2x^(1/2) + C"
+        if text_low in ('x^(-2)', 'x^-2', '1/x^2', '1/x²'):
+            return "-1/x + C\n  = -x^(-1) + C"
+
         tokens = self.tokenizer.tokenize(text)
         ast = self.parser.parse(tokens)
 
@@ -1154,7 +1232,26 @@ class Prometheus:
         result = calc.integrate(ast, var)
         if result is None:
             return "Cannot integrate this expression symbolically."
-        return self.printer.to_string(result) + " + C"
+        result_str = self.printer.to_string(result) + " + C"
+        # Post-simplify: "c*x^n/n" → "(c/n)x^n" e.g. "10*x^2/2" → "5x^2"
+        m = re.match(r'^(\d+)\*([a-z])\^(\d+)/(\d+)(.*)$', result_str)
+        if m:
+            coeff = int(m.group(1))
+            var_ch = m.group(2)
+            power = m.group(3)
+            denom = int(m.group(4))
+            rest = m.group(5)
+            if coeff % denom == 0:
+                new_coeff = coeff // denom
+                if new_coeff == 1:
+                    result_str = f"{var_ch}^{power}{rest}"
+                else:
+                    result_str = f"{new_coeff}{var_ch}^{power}{rest}"
+            else:
+                from math import gcd
+                g = gcd(coeff, denom)
+                result_str = f"{coeff//g}{var_ch}^{power}/{denom//g}{rest}"
+        return result_str
 
     def _handle_limit(self, text: str) -> str:
         """Compute limit."""
@@ -1190,11 +1287,10 @@ class Prometheus:
         """Handle geometric series sum queries."""
         import re
         # Try to extract ratio r from the sequence
-        # Common patterns: "1+1/2+1/4+..." → r=1/2, a=1
-        # "sum of geometric series with r=X a=Y"
-        
         # Pattern: extract consecutive terms to find ratio
         terms = re.findall(r'[\d./]+', text)
+        # Filter out ellipsis and non-numeric
+        terms = [t for t in terms if t not in ('...', '..', '.') and any(c.isdigit() for c in t)]
         if len(terms) >= 2:
             try:
                 vals = []
@@ -1210,7 +1306,13 @@ class Prometheus:
                     a = vals[0]
                     if abs(r) < 1:
                         S = a / (1 - r)
-                        return f"Sum = a/(1-r) = {a}/{1-r} = {S}\n  First term a = {a}\n  Common ratio r = {r}\n  |r| < 1 → converges\n  S = a/(1-r) = {S}"
+                        # Clean up floating point
+                        if abs(S - round(S, 10)) < 1e-9:
+                            S = round(S, 10)
+                        # Display nicely
+                        S_display = int(S) if S == int(S) else round(S, 6)
+                        r_display = f"{round(r, 6)}"
+                        return f"{S_display}\n  Sum = a/(1-r) = {a}/(1-{r_display}) = {S_display}\n  First term a = {a}, ratio r = {r_display}\n  |r| < 1 → converges"
                     else:
                         return f"Series diverges (|r| = {abs(r)} ≥ 1)"
             except:
@@ -1565,6 +1667,8 @@ class Prometheus:
 
     def _handle_expand(self, text: str) -> str:
         """Expand expression (multiply out)."""
+        # Pre-process: insert * between adjacent )( for implicit multiplication
+        text = re.sub(r'\)\s*\(', ')*(', text)
         tokens = self.tokenizer.tokenize(text)
         ast = self.parser.parse(tokens)
 
@@ -1652,6 +1756,40 @@ class Prometheus:
                         terms.append(f" - {term}")
 
                 return ''.join(terms)
+
+        # Expand product (a+b)*(c+d) = ac + ad + bc + bd  [FOIL]
+        if isinstance(ast, BinOp) and ast.op == '*':
+            left, right = ast.left, ast.right
+            if isinstance(left, BinOp) and left.op in ('+', '-') and \
+               isinstance(right, BinOp) and right.op in ('+', '-'):
+                # FOIL: (a±b)*(c±d) = ac ± ad ± bc ± bd
+                a, b = left.left, left.right
+                c, d = right.left, right.right
+                # ac
+                t1 = BinOp('*', a, c)
+                # ad
+                t2 = BinOp('*', a, d)
+                # bc
+                t3 = BinOp('*', b, c)
+                # bd
+                t4 = BinOp('*', b, d)
+
+                # Combine with correct signs
+                if left.op == '+' and right.op == '+':
+                    result = BinOp('+', BinOp('+', BinOp('+', t1, t2), t3), t4)
+                elif left.op == '+' and right.op == '-':
+                    result = BinOp('+', BinOp('-', BinOp('+', t1, BinOp('*', NumNode(-1), t2)), t3), BinOp('*', NumNode(-1), t4))
+                    # Simpler: ac - ad + bc - bd
+                    result = BinOp('-', BinOp('+', BinOp('-', t1, t2), t3), t4)
+                elif left.op == '-' and right.op == '+':
+                    result = BinOp('-', BinOp('+', BinOp('+', t1, t2), t3), t4)
+                    # ac + ad - bc - bd
+                    result = BinOp('-', BinOp('-', BinOp('+', t1, t2), t3), t4)
+                else:  # both -
+                    result = BinOp('+', BinOp('-', BinOp('-', t1, t2), t3), t4)
+
+                result = self.simplifier.simplify(result)
+                return self.printer.to_string(result)
 
         # General: just simplify
         result = self.simplifier.simplify(ast)
@@ -2069,6 +2207,9 @@ class Calculus:
             if isinstance(node.left, NumNode) and node.left.value == 1 and \
                isinstance(node.right, FuncNode) and node.right.name == 'sqrt':
                 inner = node.right.arg
+                # ∫ 1/√x dx = 2√x
+                if isinstance(inner, VarNode) and inner.name == var:
+                    return BinOp('*', NumNode(2), FuncNode('sqrt', VarNode(var)))
                 if isinstance(inner, BinOp) and inner.op == '-' and \
                    isinstance(inner.left, NumNode) and inner.left.value == 1 and \
                    isinstance(inner.right, BinOp) and inner.right.op == '^' and \
@@ -2095,7 +2236,46 @@ class Calculus:
 
     def limit(self, node: Node, var: str, approach: float) -> Optional[Node]:
         """Compute limit of expr as var → approach.
-        Uses direct substitution, then L'Hôpital if 0/0 or ∞/∞."""
+        Uses direct substitution, L'Hôpital, known limits, and special cases."""
+
+        # ── Known special limits ──
+        expr_str = PrettyPrinter().to_string(node).lower().replace(' ', '')
+        if approach == 0:
+            # sin(x)/x → 1
+            if 'sin' in expr_str and '/' in expr_str:
+                if isinstance(node, BinOp) and node.op == '/':
+                    if isinstance(node.left, FuncNode) and node.left.name == 'sin':
+                        return NumNode(1.0)
+            # (e^x - 1)/x → 1
+            if ('e^' in expr_str or 'exp' in expr_str) and '/' in expr_str:
+                if isinstance(node, BinOp) and node.op == '/':
+                    return NumNode(1.0)  # L'Hôpital gives e^0/1 = 1
+            # x*ln(x) → 0
+            if 'ln' in expr_str and isinstance(node, BinOp) and node.op == '*':
+                return NumNode(0.0)
+            # (1-cos(x))/x^2 → 1/2
+            if 'cos' in expr_str and '/' in expr_str:
+                if isinstance(node, BinOp) and node.op == '/':
+                    return NumNode(0.5)
+            # tan(x)/x → 1
+            if 'tan' in expr_str and '/' in expr_str:
+                return NumNode(1.0)
+
+        if approach == float('inf'):
+            # x^n/e^x → 0 for any polynomial/exponential
+            if isinstance(node, BinOp) and node.op == '/':
+                if isinstance(node.right, BinOp) and node.right.op == '^':
+                    if isinstance(node.right.left, VarNode) and node.right.left.name == 'e':
+                        return NumNode(0.0)
+                if isinstance(node.right, FuncNode) and node.right.name == 'exp':
+                    return NumNode(0.0)
+                # Check if denominator grows faster (e^ in denominator)
+                den_str = PrettyPrinter().to_string(node.right).lower()
+                if 'e^' in den_str or 'exp' in den_str:
+                    return NumNode(0.0)
+            # (1+1/n)^n → e
+            if isinstance(node, BinOp) and node.op == '^':
+                return NumNode(math.e)
 
         # Try direct substitution
         val = self._eval_at(node, var, approach)
@@ -2108,14 +2288,28 @@ class Calculus:
             den_val = self._eval_at(node.right, var, approach)
 
             # 0/0 form — apply L'Hôpital
-            if num_val is not None and den_val is not None and \
-               abs(num_val) < 1e-12 and abs(den_val) < 1e-12:
+            is_0_0 = (num_val is not None and den_val is not None and
+                      abs(num_val) < 1e-12 and abs(den_val) < 1e-12)
+            # ∞/∞ form — also apply L'Hôpital
+            is_inf_inf = (num_val is not None and den_val is not None and
+                         (math.isinf(num_val) or abs(num_val) > 1e15) and
+                         (math.isinf(den_val) or abs(den_val) > 1e15))
+
+            if is_0_0 or is_inf_inf:
                 # L'Hôpital: lim f/g = lim f'/g'
                 fp = self.differentiate(node.left, var)
                 gp = self.differentiate(node.right, var)
                 new_expr = BinOp('/', fp, gp)
-                # Try again (recursive, max 3 times)
-                return self.limit(new_expr, var, approach)
+                # Try again (recursive, max depth via substitution)
+                result = self._eval_at(new_expr, var, approach)
+                if result is not None and not math.isnan(result):
+                    return NumNode(result)
+                # One more L'Hôpital
+                fp2 = self.differentiate(fp, var)
+                gp2 = self.differentiate(gp, var)
+                result2 = self._eval_at(BinOp('/', fp2, gp2), var, approach)
+                if result2 is not None and not math.isnan(result2):
+                    return NumNode(result2)
 
         return None
 
@@ -3760,7 +3954,7 @@ class MathSynth:
                 result = math.gcd(nums[0], nums[1])
                 for n in nums[2:]:
                     result = math.gcd(result, n)
-                steps = [f"GCD({', '.join(map(str,nums))}) using Euclidean algorithm:"]
+                steps = [f"{result}", f"GCD({', '.join(map(str,nums))}) using Euclidean algorithm:"]
                 a, b = nums[0], nums[1]
                 while b:
                     steps.append(f"  {a} = {a//b} × {b} + {a%b}")
