@@ -165,6 +165,7 @@ FRENCH_MARKERS = {
 GERMAN_MARKERS = {
     'was', 'wie', 'warum', 'wer', 'wo', 'wann', 'welche',
     'ist', 'sind', 'hat', 'haben', 'wird', 'werden',
+    'gibt', 'gibt es', 'es gibt',  # "there is"
     'der', 'die', 'das', 'ein', 'eine', 'den', 'dem',
     'ich', 'du', 'er', 'sie', 'wir', 'ihr',
     'nicht', 'kein', 'aber', 'oder', 'und', 'weil', 'wenn',
@@ -189,6 +190,7 @@ ARABIC_MARKERS = {
     'shu', 'sho', 'eish', 'esh', 'keef', 'kif', 'lesh', 'leish',
     'howa', 'hiya', 'hum', 'ana', 'inta', 'inti', 'ihna', 'intu',
     'fi', 'min', 'ila', 'ala', 'ma3', 'bidun', 'ba3d', 'abl',
+    'el', 'al',  # Arabic definite article — very common
     'la', 'mish', 'mush', 'bas', 'laken', 'aw', 'wa',
     'yani', 'tab', 'tayyib', 'khalas', 'inshallah', 'wallah',
     'mumkin', 'lazim', 'biddi', 'abgha', 'abbi',
@@ -236,8 +238,9 @@ BENGALI_MARKERS = {
     'ami', 'tumi', 'apni', 'se', 'tara', 'amra',
     'na', 'kintu', 'ba', 'ar', 'karon', 'jodi', 'tahole',
     'kora', 'bola', 'dekhao', 'bojhao', 'hisab',
-    'ta', 'ti', 'te', 'r', 'er', 'ke', 'theke',
+    'ta', 'ti', 'te', 'r', 'er', 'theke',
     'bol', 'bolo', 'koro', 'dao', 'jano',
+    'kaj', 'kore',  # "work" and "does" — very common Bengali grammar
 }
 
 # Kannada function words (Romanized)
@@ -254,6 +257,7 @@ KANNADA_MARKERS = {
 # Malayalam function words (Romanized)
 MALAYALAM_MARKERS = {
     'enthu', 'entha', 'engane', 'enthukond', 'evide', 'eppol', 'aaru',
+    'enthanu', 'enthaa',  # More forms of "what"
     'aanu', 'und', 'undayirunnu', 'aakum',
     'njan', 'nee', 'avan', 'aval', 'nammal', 'ningal', 'avar',
     'alla', 'pakshe', 'atho', 'um', 'kaaranam', 'enkil',
@@ -406,7 +410,7 @@ class PhoneticNormalizer:
         'chp': 'cheppu', 'chpp': 'cheppu',  # Telugu typo
         'frml': 'formula', 'frmla': 'formula',  # Common abbrev
         'frce': 'force', 'grvty': 'gravity',  # Content abbrevs
-        'el': 'ela', 'endku': 'enduku',  # Telugu grammar abbrevs
+        'endku': 'enduku',  # Telugu grammar abbrevs
     }
 
     # Consonant skeletons for fuzzy function-word matching
@@ -440,13 +444,15 @@ class PhoneticNormalizer:
         words = [self.ABBREVS.get(w, w) for w in words]
         t = ' '.join(words)
 
-        # Step 2: Collapse repeated letters (antte → ante, entti → enti)
-        t = re.sub(r'(.)\1{2,}', r'\1\1', t)  # 3+ → 2
-        t = re.sub(r'([^aeiou])\1', r'\1', t)  # double consonants → single (except vowels)
-
-        # Step 3: Normalize common phonetic equivalences
-        # Don't be aggressive here — just the most common swaps
-        t = t.replace('ph', 'f').replace('ght', 't')
+        # Step 2: Collapse repeated letters PER WORD (not across boundaries)
+        words2 = t.split()
+        fixed = []
+        for w in words2:
+            w = re.sub(r'(.)\1{2,}', r'\1\1', w)  # 3+ → 2
+            w = re.sub(r'([^aeiou\s])\1', r'\1', w)  # double consonants → single
+            w = w.replace('ph', 'f').replace('ght', 't')
+            fixed.append(w)
+        t = ' '.join(fixed)
 
         # Step 4: Clean extra spaces
         t = re.sub(r'\s+', ' ', t).strip()
