@@ -25,5 +25,6 @@ models/piper/*.onnx.json
 # Generated WAV files
 src/python/voice/genes/wavs/
 src/python/voice/genes/calibration/
-/tmp/*.wav
-*.wav
+/tmp/# *.wav excluded except samples
+# *.wav excluded except samples
+!samples/*.wav
