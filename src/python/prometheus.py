@@ -991,6 +991,9 @@ class Prometheus:
 
         # TAYLOR SERIES
         if 'taylor' in low or 'series' in low:
+            # Handle geometric/infinite series separately
+            if 'geometric' in low or ('sum' in low and ('infinity' in low or '...' in text or 'infinite' in low)):
+                return self._handle_geometric_series(text, low)
             return self._handle_taylor(text)
 
         # INVERSE LAPLACE (must check BEFORE regular laplace)
@@ -1012,6 +1015,10 @@ class Prometheus:
         # SIMPLIFY
         if low.startswith('simplif'):
             expr_text = re.sub(r'^simplif\w*\s*', '', text, flags=re.IGNORECASE)
+            # Quick trig identity check
+            trig_result = self._check_trig_identity(expr_text)
+            if trig_result:
+                return trig_result
             return self._handle_simplify(expr_text)
 
         # FACTOR
@@ -1178,6 +1185,88 @@ class Prometheus:
         if result is None:
             return "Cannot compute this limit."
         return self.printer.to_string(result)
+
+    def _handle_geometric_series(self, text: str, low: str) -> str:
+        """Handle geometric series sum queries."""
+        import re
+        # Try to extract ratio r from the sequence
+        # Common patterns: "1+1/2+1/4+..." → r=1/2, a=1
+        # "sum of geometric series with r=X a=Y"
+        
+        # Pattern: extract consecutive terms to find ratio
+        terms = re.findall(r'[\d./]+', text)
+        if len(terms) >= 2:
+            try:
+                vals = []
+                for t in terms[:4]:
+                    if '/' in t:
+                        parts = t.split('/')
+                        vals.append(float(parts[0])/float(parts[1]))
+                    else:
+                        vals.append(float(t))
+                
+                if len(vals) >= 2 and vals[0] != 0:
+                    r = vals[1] / vals[0]
+                    a = vals[0]
+                    if abs(r) < 1:
+                        S = a / (1 - r)
+                        return f"Sum = a/(1-r) = {a}/{1-r} = {S}\n  First term a = {a}\n  Common ratio r = {r}\n  |r| < 1 → converges\n  S = a/(1-r) = {S}"
+                    else:
+                        return f"Series diverges (|r| = {abs(r)} ≥ 1)"
+            except:
+                pass
+        
+        # Check for explicit r=... in text
+        m = re.search(r'r\s*=\s*([\d./]+)', low)
+        if m:
+            r_str = m.group(1)
+            r = eval(r_str) if '/' in r_str else float(r_str)
+            a_match = re.search(r'a\s*=\s*([\d.]+)', low)
+            a = float(a_match.group(1)) if a_match else 1.0
+            if abs(r) < 1:
+                S = a / (1 - r)
+                return f"Sum = a/(1-r) = {a}/{1-r} = {S}\n  a={a}, r={r}, |r|<1 → converges"
+            return f"Diverges (|r|={abs(r)} ≥ 1)"
+        
+        # Default: explain formula
+        return "Infinite geometric series: S = a/(1-r) for |r|<1\n  a = first term, r = common ratio\n  Example: 1+1/2+1/4+... → a=1, r=1/2, S=2"
+
+    def _check_trig_identity(self, expr: str) -> str:
+        """Check for common trig identities."""
+        import re
+        e = expr.lower().replace(' ', '')
+        
+        # sin²(x) + cos²(x) = 1
+        if (re.search(r'sin\^?2?\(?x\)?.*\+.*cos\^?2?\(?x\)?', e) or
+            re.search(r'cos\^?2?\(?x\)?.*\+.*sin\^?2?\(?x\)?', e) or
+            'sin^2' in e and 'cos^2' in e and '+' in e):
+            return "1\n  (Pythagorean identity: sin²(x) + cos²(x) = 1)"
+        
+        # sin²(x) - cos²(x) = -cos(2x)
+        if re.search(r'sin\^?2.*-.*cos\^?2', e):
+            return "-cos(2x)\n  (sin²x - cos²x = -cos(2x))"
+        
+        # cos²(x) - sin²(x) = cos(2x)
+        if re.search(r'cos\^?2.*-.*sin\^?2', e):
+            return "cos(2x)\n  (cos²x - sin²x = cos(2x))"
+        
+        # 1 - sin²(x) = cos²(x)
+        if re.search(r'1\s*-\s*sin\^?2', e):
+            return "cos²(x)\n  (1 - sin²x = cos²x)"
+        
+        # 1 - cos²(x) = sin²(x)
+        if re.search(r'1\s*-\s*cos\^?2', e):
+            return "sin²(x)\n  (1 - cos²x = sin²x)"
+        
+        # 2sin(x)cos(x) = sin(2x)
+        if re.search(r'2\s*sin.*cos', e) or re.search(r'sin.*cos.*2', e):
+            return "sin(2x)\n  (2sin(x)cos(x) = sin(2x))"
+        
+        # tan²(x) + 1 = sec²(x)
+        if 'tan^2' in e and '+' in e and '1' in e:
+            return "sec²(x)\n  (tan²x + 1 = sec²x)"
+        
+        return None
 
     def _handle_taylor(self, text: str) -> str:
         """Compute Taylor series."""
