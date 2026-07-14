@@ -1206,7 +1206,7 @@ class Axima:
         return f"✅ Workflow '{name}' created! Triggers on: {trigger_type}='{trigger_value}'"
 
     def _solve_physics(self, question: str, lower: str) -> Optional[str]:
-        """Route physics question to appropriate solver and return answer."""
+        """Route physics question to appropriate solver and return deep educational answer."""
         import re
         from prometheus_physics import PhysicsIdentifier, PhysicsLawDB, PhysicsConstants
         from prometheus_physics_solve import (NewtonianSolver, EMSolver, WaveSolver,
@@ -1224,24 +1224,29 @@ class Axima:
         if any(w in lower for w in ['derive', 'show that', 'prove', 'derivation']):
             DE = DerivationEngine()
             for target in DE.available_derivations():
-                # Match by: full name in question, or any word >3 chars
                 target_lower = target.lower().replace('_', ' ')
                 if (target_lower in lower or target.lower() in lower or
                     any(w in lower for w in target_lower.split() if len(w) > 3)):
                     d = DE.derive(target)
                     if d:
-                        steps = '\n'.join(d['steps'])
-                        return f"📐 {d['result']}\n\nFrom: {d['from']}\n\n{steps}"
+                        steps = '\n'.join(f'  {s}' for s in d['steps'])
+                        return (f"📐 Derivation: {d['result']}\n\n"
+                                f"Starting from: {d['from']}\n\n"
+                                f"{steps}\n\n"
+                                f"  ∴ {d['result']} □")
 
-        # Try Fermi estimator (for "how many", "estimate", "order of magnitude")
+        # Try Fermi estimator
         if any(w in lower for w in ['how many', 'estimate', 'order of magnitude', 'roughly']):
             FE = FermiEstimator()
             est = FE.estimate(question)
             if est:
-                reasoning = '\n'.join(f'  • {r}' for r in est['reasoning'])
-                return f"🔬 Fermi Estimate: {est['answer']}\n\nReasoning:\n{reasoning}"
+                reasoning = '\n'.join(f'  {i+1}. {r}' for i,r in enumerate(est['reasoning']))
+                return (f"🔬 Fermi Estimate: {est['answer']}\n\n"
+                        f"Reasoning (order-of-magnitude):\n{reasoning}\n\n"
+                        f"  Final answer: {est['answer']}\n"
+                        f"  (Fermi estimation: break into simpler known quantities)")
 
-        # Route to domain-specific solver
+        # Route to domain-specific solver with DEEP explanations
         try:
             if top_domain == "classical_mechanics":
                 NS = NewtonianSolver()
@@ -1249,13 +1254,51 @@ class Axima:
                     v0 = numbers[0] if numbers else 20
                     angle = numbers[1] if len(numbers) > 1 else 45
                     r = NS.projectile(v0, angle)
-                    return f"⚙️ Projectile Motion (v₀={v0} m/s, θ={angle}°):\n  Range: {r['range']:.2f} m\n  Max height: {r['max_height']:.2f} m\n  Time of flight: {r['time_of_flight']:.2f} s\n  {r['formula']}"
-                elif 'pendulum' in lower or 'period' in lower:
+                    import math as _m
+                    theta_rad = _m.radians(angle)
+                    return (f"⚙️ Projectile Motion\n\n"
+                            f"  Given: v₀ = {v0} m/s, θ = {angle}°\n\n"
+                            f"  Physics: Object launched at angle follows parabolic path.\n"
+                            f"  The motion separates into independent x and y components.\n\n"
+                            f"  Step 1: Decompose velocity\n"
+                            f"    vₓ = v₀·cos(θ) = {v0}·cos({angle}°) = {r['vx']:.2f} m/s\n"
+                            f"    vy = v₀·sin(θ) = {v0}·sin({angle}°) = {r['vy0']:.2f} m/s\n\n"
+                            f"  Step 2: Time of flight (y returns to ground)\n"
+                            f"    t = 2·vy/g = 2×{r['vy0']:.2f}/9.81 = {r['time_of_flight']:.3f} s\n\n"
+                            f"  Step 3: Range (horizontal distance)\n"
+                            f"    R = vₓ·t = {r['vx']:.2f} × {r['time_of_flight']:.3f} = {r['range']:.2f} m\n"
+                            f"    (Also: R = v₀²·sin(2θ)/g = {r['range']:.2f} m ✓)\n\n"
+                            f"  Step 4: Maximum height\n"
+                            f"    H = vy²/(2g) = {r['vy0']:.2f}²/(2×9.81) = {r['max_height']:.2f} m\n\n"
+                            f"  ═══════════════════════\n"
+                            f"  Range:       {r['range']:.2f} m\n"
+                            f"  Max height:  {r['max_height']:.2f} m\n"
+                            f"  Flight time: {r['time_of_flight']:.3f} s\n"
+                            f"  ═══════════════════════")
+
+                elif 'pendulum' in lower or ('period' in lower and 'spring' not in lower):
                     L = numbers[0] if numbers else 1.0
                     r = NS.shm(L=L)
-                    return f"⚙️ Pendulum (L={L} m):\n  Period: {r['period']:.4f} s\n  Frequency: {r['frequency']:.4f} Hz\n  ω = {r['omega']:.4f} rad/s\n  {r['formula']}"
-                elif 'orbit' in lower or 'escape' in lower:
-                    if 'escape' in lower and numbers:
+                    return (f"⚙️ Simple Pendulum\n\n"
+                            f"  Given: L = {L} m\n\n"
+                            f"  Physics: For small oscillations, the pendulum behaves as a\n"
+                            f"  simple harmonic oscillator. The restoring force is the\n"
+                            f"  tangential component of gravity: F = -mg·sin(θ) ≈ -mgθ\n\n"
+                            f"  Derivation:\n"
+                            f"    Torque: τ = -mgL·sin(θ) ≈ -mgLθ (small angle)\n"
+                            f"    I·α = -mgLθ → mL²·θ̈ = -mgLθ\n"
+                            f"    θ̈ + (g/L)θ = 0  ← SHM equation!\n\n"
+                            f"  Therefore:\n"
+                            f"    ω = √(g/L) = √(9.81/{L}) = {r['omega']:.4f} rad/s\n"
+                            f"    T = 2π/ω = 2π√(L/g) = 2π√({L}/9.81) = {r['period']:.4f} s\n"
+                            f"    f = 1/T = {r['frequency']:.4f} Hz\n\n"
+                            f"  Key insight: Period depends ONLY on length and g,\n"
+                            f"  NOT on mass or amplitude (for small angles).\n\n"
+                            f"  ═══════════════════════\n"
+                            f"  Period:    T = {r['period']:.4f} s\n"
+                            f"  Frequency: f = {r['frequency']:.4f} Hz\n"
+                            f"  ω = {r['omega']:.4f} rad/s\n"
+                            f"  ═══════════════════════")
                         M = numbers[0] if numbers[0] > 1e10 else 5.972e24
                         R = numbers[1] if len(numbers) > 1 else 6.371e6
                         v = NS.escape_velocity(M, R)

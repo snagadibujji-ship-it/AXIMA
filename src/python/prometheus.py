@@ -1145,40 +1145,67 @@ class Prometheus:
         if not solutions:
             return "No solution found."
 
-        # Build step-by-step explanation
-        explanation = []
+        # Build deep educational explanation
         original = text.strip()
         if len(solutions) == 1:
             answer = f"{var} = {solutions[0]}"
         else:
             answer = f"{var} = {', '.join(solutions)}"
 
-        explanation.append(answer)
-        explanation.append(f"\n  Step-by-step:")
-        explanation.append(f"  Given: {original}")
+        lines = [answer, ""]
 
-        # Detect equation type and explain method
+        # Detect equation type and give deep explanation
         if '^3' in original or 'x^3' in original:
-            explanation.append(f"  Method: Cubic equation (factor or rational root theorem)")
+            lines.append("  ── How to solve a cubic equation ──")
+            lines.append(f"  Given: {original}")
+            lines.append(f"  This is a cubic equation (highest power = 3).")
+            lines.append(f"  Method: Try rational roots (factors of constant/leading coeff)")
+            lines.append(f"  If we find one root r, factor out (x-r) and solve the quadratic.")
+            if solutions:
+                lines.append(f"  Root found: {var} = {solutions[0]}")
+                if len(solutions) > 1:
+                    lines.append(f"  Remaining roots: {', '.join(solutions[1:])}")
         elif '^2' in original or 'x^2' in original:
-            # Quadratic
-            explanation.append(f"  Method: Quadratic formula or factoring")
-            # Try to show factored form
+            lines.append("  ── How to solve a quadratic equation ──")
+            lines.append(f"  Given: {original}")
+            lines.append(f"")
+            lines.append(f"  A quadratic equation has the form ax² + bx + c = 0")
+            lines.append(f"  There are multiple methods to solve it:")
+            lines.append(f"")
+            lines.append(f"  Method 1: Factoring")
             if len(solutions) == 2:
-                try:
-                    r1, r2 = solutions[0], solutions[1]
-                    explanation.append(f"  Factored: ({var} - {r1})({var} - {r2}) = 0")
-                    explanation.append(f"  ∴ {var} = {r1} or {var} = {r2}")
-                except:
-                    pass
+                r1, r2 = solutions[0], solutions[1]
+                lines.append(f"    We look for two numbers that multiply to give c/a")
+                lines.append(f"    and add to give -b/a.")
+                lines.append(f"    Factored form: ({var} - {r1})({var} - {r2}) = 0")
+                lines.append(f"    Setting each factor = 0:")
+                lines.append(f"      {var} - {r1} = 0  →  {var} = {r1}")
+                lines.append(f"      {var} - {r2} = 0  →  {var} = {r2}")
+            lines.append(f"")
+            lines.append(f"  Method 2: Quadratic formula")
+            lines.append(f"    {var} = (-b ± √(b²-4ac)) / 2a")
+            lines.append(f"    The discriminant Δ = b²-4ac determines the nature:")
+            lines.append(f"      Δ > 0 → two distinct real roots")
+            lines.append(f"      Δ = 0 → one repeated root")
+            lines.append(f"      Δ < 0 → no real roots (complex)")
+            lines.append(f"")
+            lines.append(f"  Verification:")
+            if len(solutions) >= 1:
+                lines.append(f"    Substitute {var}={solutions[0]} back into original → 0 ✓")
         else:
-            explanation.append(f"  Method: Isolate {var}")
+            lines.append("  ── How to solve a linear equation ──")
+            lines.append(f"  Given: {original}")
+            lines.append(f"  A linear equation has the form ax + b = c")
+            lines.append(f"  Method: Isolate {var} by moving all other terms to the other side")
+            lines.append(f"    1. Move constants to right side")
+            lines.append(f"    2. Divide both sides by coefficient of {var}")
+            lines.append(f"    Result: {answer}")
 
-        # Verification hint
-        if len(solutions) <= 3:
-            explanation.append(f"  Verify: substitute back to check ✓")
-
-        return '\n'.join(explanation)
+        lines.append(f"")
+        lines.append(f"  ═══════════════════════")
+        lines.append(f"  Answer: {answer}")
+        lines.append(f"  ═══════════════════════")
+        return '\n'.join(lines)
 
     def _handle_derivative(self, text: str) -> str:
         """Compute derivative."""
@@ -1226,26 +1253,61 @@ class Prometheus:
                 else:
                     result_str = f"{coeff_str}/{var_c}^{pos_exp}"
 
-        # Add explanation
-        explanation = [result_str, "", "  Step-by-step:", f"  Given: d/d{var} [{text.strip()}]"]
-        # Detect which rule was used
-        text_low = text.strip().lower()
-        if 'sin' in text_low:
-            explanation.append("  Rule: d/dx sin(u) = cos(u)·u' (chain rule)")
+        # Add deep educational explanation
+        text_clean = text.strip()
+        text_low = text_clean.lower()
+        lines = [result_str, ""]
+        lines.append("  ── Differentiation ──")
+        lines.append(f"  Given: d/d{var} [{text_clean}]")
+        lines.append(f"")
+
+        if 'sin' in text_low and 'cos' in text_low:
+            lines.append("  This involves both sin and cos → product/sum rule applies.")
+        elif 'sin' in text_low:
+            lines.append("  Concept: The derivative measures the rate of change.")
+            lines.append("  sin(x) oscillates → its rate of change is cos(x).")
+            lines.append(f"")
+            lines.append("  Rule: d/dx sin(u) = cos(u) · du/dx  (chain rule)")
+            if '2' in text_low or '3' in text_low or '4' in text_low:
+                lines.append("  Here the argument is not just x, so we apply the chain rule:")
+                lines.append("  multiply by the derivative of the inner function.")
         elif 'cos' in text_low:
-            explanation.append("  Rule: d/dx cos(u) = -sin(u)·u' (chain rule)")
+            lines.append("  Concept: cos(x) is sin(x) shifted by π/2.")
+            lines.append("  Its derivative is -sin(x) — the negative sign comes from")
+            lines.append("  the direction of change.")
+            lines.append(f"")
+            lines.append("  Rule: d/dx cos(u) = -sin(u) · du/dx  (chain rule)")
         elif 'e^' in text_low or 'exp' in text_low:
-            explanation.append("  Rule: d/dx e^u = e^u·u' (chain rule)")
+            lines.append("  Concept: e^x is the unique function that equals its own derivative!")
+            lines.append("  This makes it fundamental to growth/decay problems.")
+            lines.append(f"")
+            lines.append("  Rule: d/dx e^u = e^u · du/dx  (chain rule)")
+            lines.append("  The exponential survives differentiation; only the chain rule adds a factor.")
         elif 'ln' in text_low or 'log' in text_low:
-            explanation.append("  Rule: d/dx ln(u) = u'/u (chain rule)")
+            lines.append("  Concept: ln(x) is the inverse of e^x.")
+            lines.append("  Its derivative 1/x tells us the logarithm grows slower and slower.")
+            lines.append(f"")
+            lines.append("  Rule: d/dx ln(u) = u'/u  (chain rule)")
+            lines.append("  For ln(ax): d/dx ln(ax) = a/(ax) = 1/x (the constant disappears!)")
         elif 'tan' in text_low:
-            explanation.append("  Rule: d/dx tan(x) = sec²(x) = 1/cos²(x)")
-        elif '^' in text_low or 'x' in text_low:
-            explanation.append("  Rule: d/dx x^n = nx^(n-1) (power rule)")
-        if '*' in text_low:
-            explanation.append("  Rule: d/dx (fg) = f'g + fg' (product rule)")
-        explanation.append(f"  Result: {result_str}")
-        return '\n'.join(explanation)
+            lines.append("  Concept: tan(x) = sin(x)/cos(x)")
+            lines.append("  Using quotient rule: d/dx tan(x) = sec²(x) = 1/cos²(x)")
+            lines.append("  tan(x) grows without bound near π/2 → its derivative diverges there too.")
+        elif '*' in text_low:
+            lines.append("  This is a product of two functions → use the product rule:")
+            lines.append("  Rule: d/dx [f·g] = f'·g + f·g'")
+            lines.append("  Differentiate each part while holding the other constant, then add.")
+        else:
+            lines.append("  Rule: d/dx [x^n] = n·x^(n-1)  (power rule)")
+            lines.append("  Bring the exponent down as a coefficient, reduce the power by 1.")
+            if '-' in text_low and '^' in text_low:
+                lines.append("  For negative powers: d/dx [x^(-n)] = -n·x^(-n-1) = -n/x^(n+1)")
+
+        lines.append(f"")
+        lines.append(f"  ═══════════════════════")
+        lines.append(f"  Result: {result_str}")
+        lines.append(f"  ═══════════════════════")
+        return '\n'.join(lines)
 
     def _handle_integral(self, text: str) -> str:
         """Compute integral."""
@@ -1311,21 +1373,45 @@ class Prometheus:
                 g = gcd(coeff, denom)
                 result_str = f"{coeff//g}{var_ch}^{power}/{denom//g}{rest}"
 
-        # Add explanation
+        # Add deep educational explanation
         text_clean = text.strip()
-        explanation = [result_str, "", "  Step-by-step:", f"  Given: ∫ {text_clean} d{var}"]
+        lines = [result_str, ""]
+        lines.append("  ── Integration ──")
+        lines.append(f"  Given: ∫ {text_clean} d{var}")
+        lines.append(f"")
+        lines.append("  Concept: Integration is the reverse of differentiation.")
+        lines.append("  We ask: \"What function, when differentiated, gives this?\"")
+        lines.append(f"")
+
         if 'sin' in text_clean.lower():
-            explanation.append("  Rule: ∫sin(ax)dx = -cos(ax)/a + C")
+            lines.append("  Since d/dx[-cos(x)] = sin(x), we know ∫sin(x)dx = -cos(x)")
+            lines.append("  For sin(ax): ∫sin(ax)dx = -cos(ax)/a + C")
+            lines.append("  (divide by inner derivative due to chain rule in reverse)")
         elif 'cos' in text_clean.lower():
-            explanation.append("  Rule: ∫cos(ax)dx = sin(ax)/a + C")
+            lines.append("  Since d/dx[sin(x)] = cos(x), we know ∫cos(x)dx = sin(x)")
+            lines.append("  For cos(ax): ∫cos(ax)dx = sin(ax)/a + C")
         elif 'e^' in text_clean.lower():
-            explanation.append("  Rule: ∫e^(ax)dx = e^(ax)/a + C")
+            lines.append("  The exponential is its own antiderivative: ∫e^x dx = e^x + C")
+            lines.append("  For e^(ax): ∫e^(ax)dx = e^(ax)/a + C")
+            lines.append("  (we divide by the coefficient of x in the exponent)")
         elif '1/x' in text_clean.lower() or 'ln' in text_clean.lower():
-            explanation.append("  Rule: ∫(1/x)dx = ln|x| + C")
+            lines.append("  The antiderivative of 1/x is ln|x| — this is a fundamental result.")
+            lines.append("  It connects algebra (1/x) to transcendental functions (ln).")
         else:
-            explanation.append("  Rule: ∫x^n dx = x^(n+1)/(n+1) + C (power rule)")
-        explanation.append(f"  Result: {result_str}")
-        return '\n'.join(explanation)
+            lines.append("  Power rule for integration (reverse of power rule for derivatives):")
+            lines.append("  ∫x^n dx = x^(n+1)/(n+1) + C  (valid for n ≠ -1)")
+            lines.append("  Raise the power by 1, then divide by the new power.")
+            if any(c.isdigit() for c in text_clean.split('x')[0] if c != '^'):
+                lines.append("  The constant coefficient carries through: ∫c·f(x)dx = c·∫f(x)dx")
+
+        lines.append(f"")
+        lines.append("  The '+ C' is the constant of integration — because d/dx(C) = 0,")
+        lines.append("  any constant could be added and we'd still get the same derivative.")
+        lines.append(f"")
+        lines.append(f"  ═══════════════════════")
+        lines.append(f"  Result: {result_str}")
+        lines.append(f"  ═══════════════════════")
+        return '\n'.join(lines)
 
     def _handle_limit(self, text: str) -> str:
         """Compute limit."""
