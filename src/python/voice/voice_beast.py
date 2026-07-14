@@ -31,6 +31,26 @@ class BeastSynth:
         self.source = GlottalSource(sample_rate)
         self.linguist = Linguist()
 
+        # Load MRI-calibrated area functions if available
+        self._load_calibrated_areas()
+
+        # Voice parameters
+        self.f0 = 130.0   # Base pitch
+        self.rd = 1.0     # Voice quality
+        self.rate = 1.0   # Speaking rate
+
+    def _load_calibrated_areas(self):
+        """Load calibrated area functions from JSON gene bank."""
+        import json, os
+        cal_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               'genes', 'calibrated_areas.json')
+        if os.path.exists(cal_path):
+            with open(cal_path) as f:
+                cal = json.load(f)
+            from voice_articulator import PHONEME_AREAS
+            for phone, areas in cal.items():
+                PHONEME_AREAS[phone] = areas
+
         # Voice parameters
         self.f0 = 130.0   # Base pitch
         self.rd = 1.0     # Voice quality
