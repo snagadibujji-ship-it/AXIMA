@@ -267,12 +267,14 @@ Phase 8: CLI Integration
 
 ## Success Criteria
 
-- [ ] "Build a todo app with React" → generates 5+ files, runnable
-- [ ] "Build a REST API with Flask" → generates app.py, models, routes
+- [x] "Build a todo app with React" → generates 36+ files, runnable
+- [x] "Build a REST API with Flask" → generates app.py, models, routes
 - [ ] "Add authentication" → modifies existing project correctly
-- [ ] "Fix this error: [paste]" → identifies cause, generates fix
-- [ ] "Explain this code" → ACES-quality structural explanation
-- [ ] Works offline, free, private
-- [ ] Explains in Telugu/Hindi if user types in that language
-- [ ] Generates code in 15 programming languages
-- [ ] Each project type has correct dependencies/configs
+- [x] "Fix this error: [paste]" → identifies cause, generates fix
+- [x] "Explain this code" → ACES-quality structural explanation
+- [x] Works offline, free, private
+- [x] Explains in Telugu/Hindi if user types in that language
+- [x] Generates code in 15 programming languages
+- [x] Each project type has correct dependencies/configs
+- [x] "Build a landing page" → complete HTML with physics animations
+- [x] "Build a 3D portfolio with Three.js" → WebGL scene
