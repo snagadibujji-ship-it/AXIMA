@@ -67,37 +67,110 @@ class SentencePhysics:
 
     def _fill_template(self, template: str, subject: str,
                        weight: float, color: float, speed: float, context: str) -> str:
-        """Fill a grammar skeleton with appropriate words."""
-        # Word pools organized by physics properties
-        strong_verbs = ['shattered', 'crashed', 'erupted', 'struck', 'burned', 'split', 'broke', 'roared']
-        soft_verbs = ['drifted', 'settled', 'whispered', 'faded', 'melted', 'lingered', 'dissolved', 'rested']
-        medium_verbs = ['moved', 'turned', 'carried', 'held', 'watched', 'found', 'reached', 'walked']
+        """Fill a grammar skeleton with physics-appropriate words."""
+        import time
+        # Use time-based seed for TRUE variation (never repeats)
+        seed = int(time.time() * 1000) + hash(subject + context)
 
-        dark_adj = ['silent', 'hollow', 'distant', 'fading', 'cold', 'deep', 'heavy', 'shadowed']
-        bright_adj = ['golden', 'shining', 'warm', 'gentle', 'clear', 'open', 'new', 'living']
-        neutral_adj = ['old', 'small', 'quiet', 'still', 'lone', 'last', 'first', 'true']
+        # RICH word pools — organized by physics feel
+        strong_verbs = [
+            'shattered', 'crashed', 'erupted', 'struck', 'burned', 'split', 'broke', 'roared',
+            'tore', 'ripped', 'slammed', 'exploded', 'pierced', 'cracked', 'thundered',
+            'blazed', 'surged', 'ignited', 'collided', 'devoured', 'consumed', 'ravaged',
+        ]
+        soft_verbs = [
+            'drifted', 'settled', 'whispered', 'faded', 'melted', 'lingered', 'dissolved', 'rested',
+            'floated', 'glided', 'sighed', 'breathed', 'swayed', 'folded', 'dimmed',
+            'wandered', 'eased', 'softened', 'trembled', 'flickered', 'blurred', 'stilled',
+        ]
+        medium_verbs = [
+            'moved', 'turned', 'carried', 'held', 'watched', 'found', 'reached', 'walked',
+            'stood', 'waited', 'noticed', 'followed', 'opened', 'touched', 'crossed',
+            'gathered', 'kept', 'pulled', 'lifted', 'stepped', 'remembered', 'changed',
+        ]
 
-        places = ['silence', 'distance', 'darkness', 'light', 'morning', 'space between', 'shadows', 'stillness']
-        feelings = ['like a half-remembered dream', 'as if time had stopped', 'with nothing left to say',
-                   'carrying the weight of years', 'lighter now than before', 'knowing it was enough']
+        dark_adj = [
+            'silent', 'hollow', 'distant', 'fading', 'cold', 'deep', 'heavy', 'shadowed',
+            'forgotten', 'broken', 'buried', 'empty', 'ancient', 'fallen', 'lost',
+            'sunken', 'withered', 'rusted', 'crumbling', 'abandoned', 'fractured', 'worn',
+        ]
+        bright_adj = [
+            'golden', 'shining', 'warm', 'gentle', 'clear', 'open', 'new', 'living',
+            'radiant', 'blooming', 'tender', 'luminous', 'vivid', 'fresh', 'rising',
+            'brilliant', 'sparkling', 'vibrant', 'boundless', 'soaring', 'infinite', 'alive',
+        ]
+        neutral_adj = [
+            'old', 'small', 'quiet', 'still', 'lone', 'last', 'first', 'true',
+            'simple', 'constant', 'familiar', 'certain', 'patient', 'steady', 'final',
+            'whole', 'real', 'strange', 'sudden', 'brief', 'single', 'ordinary',
+        ]
 
-        # Select based on physics targets
-        verb = strong_verbs[hash(subject) % len(strong_verbs)] if weight > 0.6 else \
-               soft_verbs[hash(subject + 'v') % len(soft_verbs)] if weight < 0.4 else \
-               medium_verbs[hash(subject + 'mv') % len(medium_verbs)]
+        places = [
+            'silence', 'distance', 'darkness', 'light', 'morning', 'space between',
+            'shadows', 'stillness', 'rain', 'wind', 'dust', 'midnight',
+            'fog', 'rubble', 'ash', 'twilight', 'threshold', 'wreckage',
+            'garden', 'ocean', 'sky', 'edge of everything', 'beginning', 'aftermath',
+        ]
 
-        adj = dark_adj[hash(context + 'a') % len(dark_adj)] if color < 0.4 else \
-              bright_adj[hash(context + 'b') % len(bright_adj)] if color > 0.6 else \
-              neutral_adj[hash(context + 'n') % len(neutral_adj)]
+        feelings = [
+            'like a half-remembered dream', 'as if time had stopped',
+            'with nothing left to say', 'carrying the weight of years',
+            'lighter now than before', 'knowing it was enough',
+            'as though the world had shifted', 'like waking from a long sleep',
+            'with the certainty of something ending', 'as if gravity had let go',
+            'the way light bends around corners', 'like a secret told too late',
+            'with the gentleness of falling snow', 'as if everything was forgiven',
+            'like the last note of a song', 'with the patience of deep water',
+            'the way stars appear one by one', 'like breathing after holding your breath',
+            'as though someone had opened a window', 'with the weight of unspoken words',
+        ]
 
-        place = places[hash(subject + 'p') % len(places)]
-        feeling = feelings[hash(context + 'f') % len(feelings)]
+        sensory = [
+            'the air tasted of rain and rust', 'somewhere a door creaked shut',
+            'the light turned amber then gold', 'wind moved through the empty space',
+            'the ground hummed with distant thunder', 'colors bled into each other',
+            'the sound of something falling', 'heat radiated from the stone',
+            'cold pressed against the skin', 'the scent of earth after rain',
+            'everything smelled of endings', 'the texture of silence',
+        ]
+
+        # Pick with variation (seed changes with time)
+        def pick(lst, extra_seed=0):
+            return lst[(seed + extra_seed) % len(lst)]
+
+        verb = pick(strong_verbs, 1) if weight > 0.6 else \
+               pick(soft_verbs, 2) if weight < 0.4 else \
+               pick(medium_verbs, 3)
+        adj = pick(dark_adj, 4) if color < 0.4 else \
+              pick(bright_adj, 5) if color > 0.6 else \
+              pick(neutral_adj, 6)
+        place = pick(places, 7)
+        feeling = pick(feelings, 8)
+        sense = pick(sensory, 9)
 
         # Fill template
-        result = template.replace('{subject}', subject.capitalize() if subject else 'It')
+        subj_cap = subject.capitalize() if subject else 'It'
+        result = template.replace('{subject}', subj_cap)
         result = result.replace('{strong_verb}', verb)
-        result = result.replace('{soft_verb}', soft_verbs[hash(context) % len(soft_verbs)])
-        result = result.replace('{verb}', medium_verbs[hash(subject + context) % len(medium_verbs)])
+        result = result.replace('{soft_verb}', pick(soft_verbs, 10))
+        result = result.replace('{verb}', pick(medium_verbs, 11))
+        result = result.replace('{object}', context if context else 'the moment')
+        result = result.replace('{adjective}', adj)
+        result = result.replace('{adverb}', 'slowly' if speed < 0.3 else 'suddenly' if speed > 0.7 else 'quietly' if speed < 0.5 else 'steadily')
+        result = result.replace('{place}', place)
+        result = result.replace('{feeling}', feeling)
+        result = result.replace('{extension}', feeling)
+        result = result.replace('{sensory_detail}', sense)
+        result = result.replace('{trailing}', feeling)
+        result = result.replace('{time_phrase}', pick(['In that moment', 'After a long silence', 'Without warning', 'At the edge of dawn', 'Before anyone noticed', 'When the dust settled'], 12))
+        result = result.replace('{fragment}', pick([subj_cap, 'Nothing', 'Everything', 'Silence', 'The end', 'A breath'], 13))
+        result = result.replace('{consequence}', pick(['and the world shifted', 'and nothing was the same', 'and the silence answered', 'and time resumed', 'and everything changed'], 14))
+        result = result.replace('{event}', f'{subj_cap} {pick(medium_verbs, 15)}')
+        result = result.replace('{description}', f'{adj} and {pick(feelings, 16)[:30]}')
+        result = result.replace('{subject2}', pick(['the world', 'everything else', 'the silence', 'time itself', 'the sky above'], 17))
+        result = result.replace('{verb2}', pick(['held its breath', 'stood still', 'waited', 'answered back', 'fell quiet'], 18))
+
+        return result
         result = result.replace('{object}', context if context else 'the moment')
         result = result.replace('{adjective}', adj)
         result = result.replace('{adverb}', 'slowly' if speed < 0.4 else 'suddenly' if speed > 0.7 else 'quietly')
