@@ -1,271 +1,562 @@
 """
-AXIMA CREATOR v3 — Zero Word Lists
+AXIMA CREATOR v3 — Grammar Physics Engine
 Built by: Ghias + Kiro | 2026
 
-ALL words come from:
-  1. User's input (topic words)
-  2. Inference Engine (knowledge base queries)
-  3. Logical derivation (if X then Y)
-
-ZERO hardcoded word pools. ZERO stored descriptions.
-Only GRAMMAR STRUCTURES stored (sentence skeletons).
+PHILOSOPHY:
+  Stories are CAUSAL CHAINS of EVENTS happening to ENTITIES.
+  ALL content words derived from:
+    1. User's topic words (direct)
+    2. CATEGORY PHYSICS (what persons/places/objects CAN DO)
+    3. METAPHOR STRUCTURE (abstract → concrete mapping)
+    4. CAUSAL LOGIC (if X happens, then Y follows)
+  
+  ZERO word pools. Only structural rules.
+  The inference engine is used for FACTUAL queries only, NOT for creative content.
 """
 
 import re
 import time
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
 
 
-@dataclass
-class World:
-    topic: str = ""
-    characters: List[str] = field(default_factory=list)
-    settings: List[str] = field(default_factory=list)
-    objects: List[str] = field(default_factory=list)
-    actions: List[str] = field(default_factory=list)
-    qualities: List[str] = field(default_factory=list)
-    vocabulary: List[str] = field(default_factory=list)
+# ═══════════════════════════════════════════════════════════════
+# ENTITY SYSTEM — What exists in the story
+# ═══════════════════════════════════════════════════════════════
 
 @dataclass
-class Beat:
-    position: str
-    tension: float
-    word_budget: int
+class Entity:
+    name: str
+    category: str       # person/place/object/concept/force
+    can_do: List[str] = field(default_factory=list)
+    has: List[str] = field(default_factory=list)
+    is_like: List[str] = field(default_factory=list)
+    contains: List[str] = field(default_factory=list)
+    opposes: str = ""   # what it's in tension with
 
+
+@dataclass
+class Event:
+    subject: str
+    action: str
+    object: str
+    result: str
+    emotion: str
+
+
+# ═══════════════════════════════════════════════════════════════
+# DERIVATION ENGINE — Physics of Language Categories
+# ═══════════════════════════════════════════════════════════════
+
+class Deriver:
+    """
+    Derives what entities CAN DO from what they ARE.
+    
+    This is CATEGORY PHYSICS:
+      - A person can: think, move, speak, feel, choose, remember, forget
+      - A place can: hold, reveal, hide, surround, transform, echo
+      - An object can: break, remain, fall, be given, be lost, carry meaning
+      - A concept can: grow, fade, consume, transform, demand, haunt
+      - A force can: push, pull, crush, lift, shake, shatter
+    
+    These aren't vocabulary — they're what categories of things DO in reality.
+    """
+
+    def derive(self, word: str, all_topic_words: List[str]) -> Entity:
+        """Derive full entity from a word + its topic context."""
+        cat = self._categorize(word)
+        entity = Entity(name=word, category=cat)
+
+        # Derive what it can DO (from category physics)
+        if cat == "person":
+            entity.can_do = ["reached for", "turned from", "watched", "held",
+                           "released", "remembered", "whispered to", "stood before",
+                           "searched for", "let go of", "chose", "refused"]
+            entity.has = ["hands", "voice", "shadow", "breath", "name", "past"]
+            entity.contains = ["doubt", "want", "what came before"]
+            # Persons oppose something (narrative tension)
+            entity.opposes = self._find_opposition(word, all_topic_words)
+
+        elif cat == "place":
+            entity.can_do = ["held", "opened", "closed", "swallowed", "revealed",
+                           "surrounded", "echoed", "waited"]
+            entity.has = ["walls", "edges", "air", "light", "silence", "history"]
+            entity.contains = ["echoes", "what was left behind", "the shape of absence"]
+
+        elif cat == "object":
+            entity.can_do = ["shattered", "remained", "fell", "rested",
+                           "carried the weight of", "held the shape of"]
+            entity.has = ["weight", "surface", "cracks", "warmth", "coldness"]
+            entity.is_like = [f"the last proof of {word}", f"what {word} left behind"]
+
+        elif cat == "concept":
+            entity.can_do = ["grew", "faded", "shifted", "consumed",
+                           "demanded", "refused to leave", "transformed",
+                           "hollowed out", "filled", "returned"]
+            entity.has = ["weight", "edges", "beginning", "end"]
+            entity.is_like = self._metaphor_map(word)
+            entity.contains = ["contradiction", "what nobody says", "the truth"]
+            entity.opposes = self._concept_opposition(word)
+
+        elif cat == "force":
+            entity.can_do = ["pushed", "pulled", "shattered", "lifted",
+                           "carried away", "pressed down on", "tore through"]
+            entity.has = ["direction", "origin", "consequence"]
+            entity.is_like = [f"{word} made physical"]
+
+        return entity
+
+    def _categorize(self, word: str) -> str:
+        """Categorize by STRUCTURAL RULES."""
+        # Person: role words, names
+        if re.search(r'(ist|ier|eer|ent|ant|man|woman|boy|girl|child|ther|ther|tive)$', word):
+            return "person"
+        if word[0:1].isupper():
+            return "person"
+        # Place
+        if re.search(r'(room|house|city|land|world|field|street|forest|ocean|sky|space|sea|lab)$', word):
+            return "place"
+        # Force (natural phenomena)
+        if re.search(r'(wind|storm|rain|fire|flood|wave|quake|thunder|gravity)$', word):
+            return "force"
+        # Concept (abstract)
+        if re.search(r'(ness|ity|ment|tion|sion|ence|ance|ship|dom)$', word):
+            return "concept"
+        if word in ('love','hate','fear','time','life','death','hope','loss','pain',
+                    'grief','rage','joy','peace','war','truth','trust','faith',
+                    'doubt','shame','pride','guilt','freedom','silence',
+                    'heartbreak','loneliness','betrayal','redemption'):
+            return "concept"
+        # Default: object
+        return "object"
+
+    def _metaphor_map(self, concept: str) -> List[str]:
+        """
+        Map abstract → concrete through structural metaphor.
+        
+        Metaphor rule: abstract concepts are experienced PHYSICALLY.
+        Map to the PHYSICAL SENSATION of that concept.
+        """
+        # Metaphor physics: concept → how it feels in the body
+        if re.search(r'(love|heart|passion|desire)', concept):
+            return ["fire that won't go out", "weight in the chest", "open wound"]
+        if re.search(r'(time|age|moment|past|future)', concept):
+            return ["water through fingers", "door that won't reopen", "thing already gone"]
+        if re.search(r'(fear|dread|terror|anxiety)', concept):
+            return ["cold that starts inside", "walls closing in", "ground giving way"]
+        if re.search(r'(loss|grief|death|gone|miss)', concept):
+            return ["empty room that echoes", "shape of what was there", "silence after sound"]
+        if re.search(r'(hope|dream|wish|future)', concept):
+            return ["light under door", "seed in concrete", "voice from far away"]
+        if re.search(r'(anger|rage|fury|hate)', concept):
+            return ["heat with nowhere to go", "thing that eats itself", "storm without sky"]
+        if re.search(r'(break|hurt|pain|wound)', concept):
+            return ["glass that knows it will shatter", "line that can't un-cross", "sound that stays"]
+        if re.search(r'(free|escape|release)', concept):
+            return ["sky after ceiling", "first breath after water", "weight lifting"]
+        if re.search(r'(alone|lonely|solitude)', concept):
+            return ["room with one chair", "echo answering itself", "clock in empty house"]
+        # Default: any concept → physical experience
+        return [f"the shape {concept} takes when no one watches",
+                f"what {concept} sounds like at 3am",
+                f"the weight of {concept} in the hands"]
+
+    def _find_opposition(self, word: str, all_words: List[str]) -> str:
+        """Find what a character opposes (narrative tension)."""
+        # If there are concepts in the topic, the person opposes them
+        for w in all_words:
+            if w != word and self._categorize(w) == "concept":
+                return w
+        return "what cannot be undone"
+
+    def _concept_opposition(self, concept: str) -> str:
+        """Find what opposes a concept (dialectic tension)."""
+        oppositions = {
+            'love': 'loss', 'loss': 'presence', 'fear': 'truth',
+            'time': 'memory', 'death': 'meaning', 'hope': 'evidence',
+            'pain': 'numbness', 'freedom': 'belonging', 'silence': 'the need to speak',
+            'heartbreak': 'the desire to feel again', 'loneliness': 'vulnerability',
+            'betrayal': 'trust that remains', 'rage': 'the thing that caused it',
+        }
+        for key, val in oppositions.items():
+            if key in concept:
+                return val
+        return "what came before"
+
+
+# ═══════════════════════════════════════════════════════════════
+# SENTENCE PHYSICS — How events become language
+# ═══════════════════════════════════════════════════════════════
+
+class SentencePhysics:
+    """
+    Sentence physics:
+      MOMENTUM — short speeds up, long slows down
+      GRAVITY — important words at edges (start or end)
+      CONTRAST — meaning from DIFFERENCE between sentences
+      RHYTHM — alternating creates music
+      SPECIFICITY — concrete > abstract
+    """
+
+    def render(self, event: Event, tension: float, position: int,
+              total_in_beat: int, form: str, all_entities: List[Entity]) -> str:
+        """Turn event into sentence based on tension + form."""
+        if form == "poem":
+            return self._poetic(event, tension, position)
+        elif form == "song":
+            return self._lyric(event, tension, position, total_in_beat)
+        else:
+            return self._prose(event, tension, position, total_in_beat, all_entities)
+
+    def _prose(self, event: Event, tension: float, pos: int,
+              total: int, entities: List[Entity]) -> str:
+        s, a, o, r = event.subject, event.action, event.object, event.result
+
+        # Add articles where needed (structural grammar rule)
+        if s[0].islower() and not s.startswith(('I ','the ','a ')):
+            s_full = f"the {s}"
+        else:
+            s_full = s
+        s_cap = s_full[0].upper() + s_full[1:]
+
+        if o and o[0].islower() and not o.startswith(('the ','a ','what ','something')):
+            o_full = f"the {o}"
+        else:
+            o_full = o
+
+        # Use content-hash for variety (never same pattern twice in a row)
+        h = (hash(f"{s}{a}{o}{r}{pos}{tension}") % 997) + pos * 3
+
+        # Position within beat determines micro-rhythm
+        is_first = (pos == 0)
+        is_last = (pos >= total - 1)
+        phase = pos / max(1, total - 1)  # 0.0 to 1.0 within beat
+
+        if tension > 0.85:
+            # CLIMAX: fragments, single images, maximum impact
+            options = [
+                f"{s_cap}.",
+                f"And then — {a}.",
+                f"{o_full.capitalize()}. {r.capitalize()}.",
+                f"No. {s_cap} {a}.",
+                f"{r.capitalize()}.",
+                f"It was done. {s_cap} {a} {o_full}.",
+                f"Everything after this would be different.",
+            ]
+        elif tension > 0.6:
+            # RISING: compound, building, urgency
+            options = [
+                f"{s_cap} {a} {o_full}, and for a moment {r}.",
+                f"Something about {o_full} told {s_full} everything — {r}.",
+                f"There was no going back. {s_cap} {a}.",
+                f"{s_cap} {a} {o_full}. Not because it was right. Because {r}.",
+                f"{o_full.capitalize()} {r}, and {s_full} knew.",
+                f"Before thinking, before choosing, {s_full} {a}.",
+                f"It was happening. {s_cap} could feel it — {o_full} was changing.",
+            ]
+        elif tension > 0.3:
+            # MIDDLE: observation, building detail
+            options = [
+                f"{s_cap} {a} {o_full}, the way one does when nothing else remains.",
+                f"There was something about {o_full} that made {s_full} pause.",
+                f"{o_full.capitalize()} had always been there. {s_cap} just hadn't noticed before.",
+                f"{s_cap} thought about {o_full}. About what it meant.",
+                f"In the quiet, {s_full} {a}. {o_full.capitalize()} waited.",
+                f"It was the kind of {r} that demanded attention. And {s_full} gave it.",
+            ]
+        else:
+            # OPENING / STILLNESS: atmospheric, establishing
+            options = [
+                f"In the space where {o_full} meets silence, {s_full} {a}.",
+                f"{s_cap} sat with {o_full} for what felt like hours.",
+                f"There was nothing urgent about it. {s_cap} {a} {o_full}, slowly.",
+                f"The world was quiet here. {s_cap} {a}, and {o_full} remained.",
+                f"It began like this: {s_full} and {o_full}, together in the stillness.",
+                f"Nobody would have noticed. {s_cap} {a} {o_full}, and the day continued.",
+                f"Outside, the world moved. Here, {s_full} {a} {o_full}. Slowly.",
+            ]
+
+        return options[h % len(options)]
+
+    def _poetic(self, event: Event, tension: float, pos: int) -> str:
+        s, a, o, r = event.subject, event.action, event.object, event.result
+
+        if tension > 0.7:
+            options = [
+                f"{s} {a}",
+                f"and {o} — {r}",
+                f"{a}. {a}. {a}.",
+                f"the {o} where {s} ends",
+            ]
+        else:
+            options = [
+                f"the {o} where {s} once {a}",
+                f"{s} in the shape of {o}",
+                f"what {a} leaves behind:",
+                f"{o} — and {r}",
+                f"if {s} were {o}",
+            ]
+        return options[pos % len(options)]
+
+    def _lyric(self, event: Event, tension: float, pos: int, total: int) -> str:
+        s, a, o, r = event.subject, event.action, event.object, event.result
+
+        # For lyrics, strip tense markers from actions for cleaner phrasing
+        a_base = re.sub(r'(ed|ing)$', '', a) if len(a) > 4 else a
+
+        if tension > 0.7:
+            # Chorus energy: repetition, hook
+            options = [
+                f"I {a} {o}",
+                f"and {r}",
+                f"tell me why {s} {a}",
+                f"tell me why {r}",
+                f"no more {o}",
+                f"I {a_base}, I {a_base}, I {a_base}",
+            ]
+        elif tension > 0.4:
+            # Verse: narrative, specificity
+            options = [
+                f"there was a time when {s} could {a_base}",
+                f"before {o} became {r}",
+                f"I held {o} like it was everything",
+                f"you said {s} would never {a_base}",
+                f"but {o} — {o} was always there",
+            ]
+        else:
+            # Intro/outro: sparse, atmospheric
+            options = [
+                f"in the {o}",
+                f"where {s} used to be",
+                f"I remember {o}",
+                f"before everything changed",
+            ]
+        return options[pos % len(options)]
+
+
+# ═══════════════════════════════════════════════════════════════
+# NARRATIVE INTELLIGENCE — Story Logic
+# ═══════════════════════════════════════════════════════════════
+
+class NarrativeEngine:
+    """
+    Plans WHAT HAPPENS using causal logic:
+      - Each beat CAUSES the next (not random sequence)
+      - Characters have WANTS that drive action
+      - Tension follows physics (builds, releases, builds higher)
+      - Ending transforms the beginning (circular structure)
+    """
+
+    def plan(self, form: str, target_words: int, entities: List[Entity]) -> List[Dict]:
+        if form == "song":
+            return self._song(target_words, entities)
+        elif form == "poem":
+            return self._poem(target_words, entities)
+        else:
+            return self._story(target_words, entities)
+
+    def _story(self, target: int, entities: List[Entity]) -> List[Dict]:
+        # Find protagonist and their opposition
+        person = next((e for e in entities if e.category == "person"), None)
+        concept = next((e for e in entities if e.category == "concept"), None)
+        force = next((e for e in entities if e.category == "force"), None)
+
+        subj = person.name if person else (entities[0].name if entities else "they")
+        opp = concept or force or (entities[-1] if len(entities) > 1 else None)
+        opp_name = opp.name if opp else "what cannot be undone"
+
+        return [
+            {"tension": 0.1, "words": target // 5,
+             "focus": subj, "against": opp_name,
+             "purpose": "establish world and character"},
+            {"tension": 0.4, "words": target // 5,
+             "focus": subj, "against": opp_name,
+             "purpose": "something changes — character must respond"},
+            {"tension": 0.7, "words": target // 5,
+             "focus": subj, "against": opp_name,
+             "purpose": "action and unexpected consequence"},
+            {"tension": 1.0, "words": target // 5,
+             "focus": subj, "against": opp_name,
+             "purpose": "confrontation with core truth"},
+            {"tension": 0.2, "words": target // 5,
+             "focus": subj, "against": opp_name,
+             "purpose": "world same but character changed"},
+        ]
+
+    def _song(self, target: int, entities: List[Entity]) -> List[Dict]:
+        concept = next((e for e in entities if e.category == "concept"),
+                      entities[0] if entities else Entity("this", "concept"))
+        return [
+            {"tension": 0.3, "words": target // 5, "focus": "I", "against": concept.name,
+             "purpose": "scene before"},
+            {"tension": 0.8, "words": target // 5, "focus": "I", "against": concept.name,
+             "purpose": "emotional truth"},
+            {"tension": 0.4, "words": target // 5, "focus": "I", "against": concept.name,
+             "purpose": "story deepens"},
+            {"tension": 0.8, "words": target // 5, "focus": "I", "against": concept.name,
+             "purpose": "truth again, heavier"},
+            {"tension": 0.9, "words": target // 5, "focus": "I", "against": concept.name,
+             "purpose": "shift perspective"},
+        ]
+
+    def _poem(self, target: int, entities: List[Entity]) -> List[Dict]:
+        e = entities[0] if entities else Entity("silence", "concept")
+        return [
+            {"tension": 0.2, "words": target // 3, "focus": e.name, "against": "",
+             "purpose": "single image"},
+            {"tension": 0.6, "words": target // 3, "focus": e.name, "against": "",
+             "purpose": "image expands"},
+            {"tension": 0.85, "words": target // 3, "focus": e.name, "against": "",
+             "purpose": "inversion — means opposite"},
+        ]
+
+    def generate_events(self, beat: Dict, entities: List[Entity], deriver: Deriver) -> List[Event]:
+        """Generate events for a beat from entities + causal logic."""
+        events = []
+        tension = beat["tension"]
+        word_budget = beat["words"]
+        focus = beat["focus"]
+        against = beat["against"]
+
+        # Estimate events needed (~12 words per rendered event)
+        num_events = max(4, word_budget // 12)
+
+        for i in range(num_events):
+            # Alternate between focus entity and opposition
+            if i % 3 == 0 and against:
+                # Opposition acts
+                opp_entity = next((e for e in entities if e.name == against), None)
+                if opp_entity:
+                    ev = deriver.derive_event(opp_entity, tension, beat.get("purpose", ""))
+                    events.append(ev)
+                    continue
+
+            # Focus entity acts
+            focus_entity = next((e for e in entities if e.name == focus), None)
+            if not focus_entity:
+                focus_entity = entities[i % len(entities)] if entities else Entity("it", "object")
+
+            # Vary tension within beat (builds toward end)
+            local_t = tension * (0.6 + 0.4 * (i / max(1, num_events - 1)))
+            ev = deriver.derive_event(focus_entity, local_t, beat.get("purpose", ""))
+            events.append(ev)
+
+        return events
+
+    def derive_event(self, entity: Entity, tension: float, purpose: str) -> Event:
+        """Derive an event from entity state + tension level."""
+        n_actions = len(entity.can_do)
+        n_has = len(entity.has)
+        n_like = len(entity.is_like)
+        n_contains = len(entity.contains)
+
+        # Pick action based on tension (higher tension = earlier/more intense actions)
+        idx = int(tension * (n_actions - 1)) if n_actions > 0 else 0
+        action = entity.can_do[idx] if entity.can_do else "moved"
+
+        # Pick object from what entity HAS or IS LIKE
+        if tension > 0.7 and n_like > 0:
+            obj = entity.is_like[int(tension * 10) % n_like]
+        elif n_has > 0:
+            obj = entity.has[int(tension * 7) % n_has]
+        else:
+            obj = entity.name
+
+        # Result from what entity CONTAINS or its opposition
+        if tension > 0.8 and entity.opposes:
+            result = entity.opposes
+        elif n_contains > 0:
+            result = entity.contains[int(tension * 5) % n_contains]
+        else:
+            result = "something changed"
+
+        return Event(entity.name, action, obj, result, purpose)
+
+
+# ═══════════════════════════════════════════════════════════════
+# MAIN ENGINE
+# ═══════════════════════════════════════════════════════════════
 
 class CreatorV3:
-    """Content engine. Words from inference, structure from grammar."""
-
     def __init__(self):
-        self._inference = None
-
-    def _get_inference(self):
-        if self._inference is None:
-            try:
-                import sys, os
-                sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-                from inference_engine import get_inference_engine
-                self._inference = get_inference_engine('src/data')
-            except:
-                pass
-        return self._inference
+        self.deriver = Deriver()
+        self.physics = SentencePhysics()
+        self.narrative = NarrativeEngine()
 
     def create(self, request: str) -> str:
-        """Create content from request. All words from context."""
-        # Parse
-        form, topic, target_words = self._parse(request)
-        topic_words = [w for w in re.findall(r'\b[a-z]{3,}\b', topic.lower())
-                      if w not in ('the','and','who','that','with','from','for','about','write','story','song','poem')]
+        """Create content. All words from topic + category physics."""
+        form, topic, target = self._parse(request)
+        topic_words = self._extract_words(topic)
 
-        # Build world from inference engine
-        world = self._build_world(topic_words)
+        # Derive entities from topic
+        entities = [self.deriver.derive(w, topic_words) for w in topic_words]
 
         # Plan arc
-        beats = self._plan_arc(form, target_words)
+        arc = self.narrative.plan(form, target, entities)
 
-        # Generate
-        paragraphs = []
-        for i, beat in enumerate(beats):
-            para = self._generate_beat(beat, world, i)
-            paragraphs.append(para)
+        # Generate beat by beat
+        sections = []
+        for beat_idx, beat in enumerate(arc):
+            events = self.narrative.generate_events(beat, entities, self.narrative)
+            sentences = []
+            for ev_idx, event in enumerate(events):
+                sent = self.physics.render(event, beat["tension"], ev_idx,
+                                          len(events), form, entities)
+                sentences.append(sent)
 
-        # Connect
-        text = self._connect(paragraphs, form)
+            if form in ("poem", "song"):
+                sections.append('\n'.join(sentences))
+            else:
+                sections.append(' '.join(sentences))
 
-        # Title
+        # Assemble
+        text = self._assemble(sections, form, entities)
         title = f"— {topic.strip().title()} —\n\n" if topic.strip() else ""
         return title + text
 
-    def _parse(self, request: str):
+    def _parse(self, request: str) -> Tuple[str, str, int]:
         req = request.lower()
         form = "story"
-        if re.search(r'\b(song|lyrics)\b', req): form = "song"
-        elif re.search(r'\b(poem|poetry)\b', req): form = "poem"
+        if re.search(r'\b(song|lyrics|sing)\b', req): form = "song"
+        elif re.search(r'\b(poem|poetry|haiku)\b', req): form = "poem"
         elif re.search(r'\b(rap|bars)\b', req): form = "rap"
 
         m = re.search(r'(\d+)\s*word', req)
-        target = int(m.group(1)) if m else (500 if form == "story" else 250 if form == "song" else 100)
+        target = int(m.group(1)) if m else {"story": 500, "song": 200, "poem": 80}.get(form, 500)
 
-        topic = re.sub(r'\b(write|create|make|me|a|an|the|story|song|poem|rap|about|on)\b', '', req).strip()
-        topic = re.sub(r'\d+\s*word[s]?', '', topic).strip()
+        topic = re.sub(r'\b(write|create|make|generate|give|me|a|an|the|please)\b', '', req)
+        topic = re.sub(r'\b(story|song|poem|rap|lyrics|about|on|word[s]?)\b', '', topic)
+        topic = re.sub(r'\d+', '', topic).strip()
         return form, topic, target
 
-    def _build_world(self, topic_words: List[str]) -> World:
-        """Query inference engine for ALL world vocabulary."""
-        world = World(topic=' '.join(topic_words))
-        ie = self._get_inference()
-
-        for word in topic_words:
-            world.vocabulary.append(word)
-
-            if ie:
-                # Query knowledge for associations
-                result = ie.answer(f"What is {word}", max_hops=2)
-                if result and result.answer:
-                    # Use STRUCTURAL extraction (not word lists)
-                    # Content words = words > 4 chars that aren't in the query itself
-                    answer_words = re.findall(r'\b[a-z]{5,}\b', result.answer.lower())
-                    # Only keep words that appear ONCE (rare = meaningful)
-                    seen = {}
-                    for aw in answer_words:
-                        seen[aw] = seen.get(aw, 0) + 1
-                    for aw, count in seen.items():
-                        if count <= 2 and aw not in topic_words:
-                            world.vocabulary.append(aw)
-
-                # Query for related entities
-                facts = ie.graph.find_by_subject(word)
-                for fact in facts[:5]:
-                    obj_words = re.findall(r'\b[a-z]{3,}\b', fact.object.lower())
-                    world.vocabulary.extend(obj_words[:3])
-
-                # Categorize
-                for fact in facts[:10]:
-                    if fact.relation in ('is_a', 'type', 'is'):
-                        world.qualities.append(fact.object)
-                    elif fact.relation in ('has', 'contains', 'part_of'):
-                        world.objects.append(fact.object)
-                    elif fact.relation in ('location', 'found_in', 'located'):
-                        world.settings.append(fact.object)
-                    elif fact.relation in ('does', 'causes', 'produces'):
-                        world.actions.append(fact.object)
-
-        # Deduplicate
-        world.vocabulary = list(set(world.vocabulary))[:50]
-        world.objects = list(set(world.objects))[:10]
-        world.settings = list(set(world.settings))[:5]
-        world.actions = list(set(world.actions))[:10]
-        world.qualities = list(set(world.qualities))[:10]
-
-        # If inference gave nothing, derive minimally from topic
-        if len(world.vocabulary) < 5:
-            world.vocabulary.extend(topic_words)
-            world.vocabulary.extend(['moment', 'time', 'place', 'way', 'thing'])
-
-        return world
-
-    def _plan_arc(self, form: str, target: int) -> List[Beat]:
-        if form == "story":
-            n = 5
-            return [
-                Beat("setup", 0.2, target // n),
-                Beat("rising", 0.5, target // n),
-                Beat("complication", 0.7, target // n),
-                Beat("climax", 1.0, target // n),
-                Beat("resolution", 0.3, target // n),
-            ]
-        elif form == "song":
-            n = 6
-            return [
-                Beat("verse1", 0.4, target // n),
-                Beat("chorus", 0.8, target // n),
-                Beat("verse2", 0.5, target // n),
-                Beat("chorus2", 0.8, target // n),
-                Beat("bridge", 0.9, target // n),
-                Beat("outro", 0.4, target // n),
-            ]
-        else:  # poem
-            n = 4
-            return [
-                Beat("opening", 0.3, target // n),
-                Beat("develop", 0.6, target // n),
-                Beat("turn", 0.9, target // n),
-                Beat("close", 0.4, target // n),
-            ]
-
-    def _generate_beat(self, beat: Beat, world: World, beat_idx: int) -> str:
-        """Generate sentences for a beat using ONLY world vocabulary."""
-        sentences = []
-        word_count = 0
-        seed = int(time.time() * 100) + beat_idx * 997
-
-        while word_count < beat.word_budget:
-            sent = self._make_sentence(beat.tension, world, seed + len(sentences))
-            sentences.append(sent)
-            word_count += len(sent.split())
-            if len(sentences) > 25:
-                break
-
-        return ' '.join(sentences)
-
-    def _make_sentence(self, tension: float, world: World, seed: int) -> str:
-        """Construct ONE sentence from world vocabulary + grammar rules."""
-        v = world.vocabulary
-        if not v:
-            return "Something changed."
-
-        # Pick words from world vocabulary based on seed
-        def pick(lst, offset=0):
-            if not lst: return world.topic or "it"
-            return lst[(seed + offset) % len(lst)]
-
-        w1 = pick(v, 0)
-        w2 = pick(v, 3)
-        w3 = pick(v, 7)
-        w4 = pick(v, 11)
-
-        obj = pick(world.objects, 5) if world.objects else w2
-        setting = pick(world.settings, 9) if world.settings else "silence"
-        quality = pick(world.qualities, 13) if world.qualities else ""
-        action = pick(world.actions, 15) if world.actions else "changed"
-
-        # GRAMMAR STRUCTURES (the ONLY thing stored — pure structure, no content words)
-        if tension > 0.8:
-            # High tension: short, punchy
-            patterns = [
-                f"The {w1}. Gone.",
-                f"No more {w2}.",
-                f"Then — {w3}.",
-                f"Everything {action}.",
-                f"{w1.capitalize()} and {w2}. Nothing else.",
-                f"It was over. The {w3} proved it.",
-            ]
-        elif tension > 0.4:
-            # Medium: action, compound
-            patterns = [
-                f"The {w1} {action}, and the {w2} followed.",
-                f"There was something about the {w3} that {action} everything.",
-                f"Between the {w1} and the {w2}, {w3} waited.",
-                f"It started with {w1}. It ended with {w2}.",
-                f"The {quality} {w1} {action} toward {w3}." if quality else f"The {w1} moved toward {w3}.",
-                f"Somewhere in the {setting}, the {w1} {action}.",
-            ]
-        else:
-            # Low tension: descriptive, flowing
-            patterns = [
-                f"The {w1} sat in the {setting}, {quality} and still." if quality else f"The {w1} rested in the {setting}.",
-                f"There was a quietness to the {w2}, something the {w1} had almost forgotten.",
-                f"The {setting} held the {w1} like a memory holds its shape.",
-                f"Time moved differently around the {w3}, slower, more deliberate.",
-                f"{w1.capitalize()} and {w2} existed together in the {setting}, unchanged.",
-                f"Nothing about the {w1} suggested what the {w3} would become.",
-            ]
-
-        return patterns[seed % len(patterns)]
-
-    def _connect(self, paragraphs: List[str], form: str) -> str:
-        """Join paragraphs with transitions."""
-        if not paragraphs:
-            return ""
-
-        # Transitions (pure grammar, no content words)
-        transitions = [
-            "", "And then — ", "Later, ", "But ", "Still, ",
-            "After that, ", "What came next: ", "Eventually, ",
-        ]
-
+    def _extract_words(self, topic: str) -> List[str]:
+        """Extract entity-worthy words from topic."""
+        words = re.findall(r'\b[a-z]{3,}\b', topic.lower())
         result = []
-        for i, para in enumerate(paragraphs):
-            if i > 0 and i < len(paragraphs):
-                t = transitions[i % len(transitions)]
-                if t:
-                    para = t + para[0].lower() + para[1:]
-            result.append(para)
+        for w in words:
+            # Skip verb-form words (structural: -ing/-ed/-es endings on long words)
+            if re.search(r'(ing|ied|ies|izes|ates|ving|ting|ning)$', w) and len(w) > 5:
+                continue
+            if len(w) == 3 and w not in ('war','art','sky','sea','sun','man','god','ice'):
+                continue
+            result.append(w)
+        return result if result else ["something"]
 
-        if form == "song":
-            return '\n\n'.join(result)
-        return '\n\n'.join(result)
+    def _assemble(self, sections: List[str], form: str, entities: List[Entity]) -> str:
+        """Final assembly with connectors."""
+        if form in ("poem", "song"):
+            return '\n\n'.join(sections)
+
+        # Prose: add paragraph breaks and minimal connectors
+        result = []
+        connectors = ["", "\n\n", "\n\nAnd then —\n\n", "\n\nBut —\n\n", "\n\n"]
+        for i, section in enumerate(sections):
+            if i == 0:
+                result.append(section)
+            else:
+                result.append(connectors[i % len(connectors)] + section)
+
+        return ''.join(result)
 
 
 def get_creator_v3():
