@@ -272,3 +272,258 @@ The difference:
 
   NO word pool. Just LOGICAL DERIVATION from the world model.
 ```
+
+---
+
+## BEYOND COSMIC: What Nobody Has Done
+
+### 1. RECURSIVE WORLD EXPANSION
+
+```
+Current thinking: Build world ONCE from topic, then write.
+Beyond: World GROWS as the story progresses.
+
+Beat 1 introduces: scientist, lab
+  → World expands: what does lab contain? (screens, coffee, whiteboard)
+Beat 2 introduces: discovery
+  → World expands: what does discovery create? (machine, portal, danger)
+Beat 3 introduces: consequence
+  → World expands: what changes? (people missing, buildings different)
+
+The world is NOT static. It EVOLVES with the narrative.
+Each beat can ADD new elements that weren't in the original topic.
+
+HOW: After each beat, run inference:
+  "if scientist discovers time travel, what logically follows?"
+  → needs to test it → needs a subject → goes back → changes something
+  → comes back → world is different
+
+This is PLOT DERIVATION FROM LOGIC, not from templates.
+```
+
+### 2. CHARACTER PSYCHOLOGY ENGINE
+
+```
+Characters aren't just names. They have DRIVES:
+
+DRIVE MODEL:
+  want: what they desire (scientist wants → knowledge/truth)
+  fear: what they avoid (scientist fears → losing control)
+  flaw: what holds them back (scientist's flaw → obsession over balance)
+  arc: how they change (obsessed → humbled → wiser)
+
+Every DECISION a character makes comes from drive vs fear vs flaw:
+  "Should he use the machine again?"
+  want(knowledge) says YES
+  fear(consequences) says NO
+  flaw(obsession) wins → he uses it again
+
+This produces BELIEVABLE character behavior.
+Not random actions. PSYCHOLOGICALLY DERIVED actions.
+```
+
+### 3. SENSORY LAYER (Show Don't Tell)
+
+```
+Current: "He was scared"  (TELLING — bad writing)
+Beyond: "His hands shook. The coffee cup rattled against the saucer." (SHOWING)
+
+RULE: Never state an emotion directly.
+Instead: describe PHYSICAL MANIFESTATIONS.
+
+EMOTION → PHYSICAL MAPPING (computed, not listed):
+  fear → body: trembling, cold sweat, tight chest, wide eyes
+  joy → body: warmth spreading, involuntary smile, lightness
+  anger → body: jaw clenching, fists, heat rising, narrowed eyes
+  sadness → body: heaviness, slow movement, unfocused eyes, silence
+
+For each emotion in a beat:
+  1. Identify the emotion (from tension curve)
+  2. Map to 2-3 physical manifestations
+  3. Weave INTO the action (not as separate sentences)
+
+  "He reached for the switch — his hand hovering,
+   trembling an inch away from everything changing."
+
+  Fear is SHOWN through the trembling hand, not STATED.
+```
+
+### 4. MICRO-RHYTHM ENGINE
+
+```
+Every paragraph has an INTERNAL RHYTHM that matches emotion:
+
+CALM SCENE:
+  Long sentence with commas, flowing description, unhurried pacing.
+  Another long one, perhaps with a gentle observation about the light.
+  Then a medium one, settling into the moment.
+
+TENSE SCENE:
+  Short. Direct.
+  He ran.
+  The door — locked.
+  Something behind him. Getting closer.
+  No time.
+
+REVELATION SCENE:
+  Build up with medium sentences, each adding a detail.
+  The picture becoming clearer, piece by piece.
+  Until one short sentence changes everything:
+  "It was him."
+
+The RHYTHM is the story. Not just words — the SHAPE of text on page.
+
+HOW: Sentence length sequence follows a PATTERN per emotion:
+  calm = [15, 18, 12, 16, 14] (all medium-long, gentle variation)
+  tense = [3, 4, 2, 6, 2, 1] (short bursts, decreasing)
+  reveal = [10, 12, 14, 16, 3] (building then snap)
+```
+
+### 5. SUBTEXT ENGINE
+
+```
+Great writing says two things at once:
+  Surface: what's literally happening
+  Subtext: what it MEANS emotionally
+
+Example:
+  Surface: "She rearranged the books on the shelf for the third time."
+  Subtext: She's avoiding the conversation. She's anxious. She needs control.
+
+HOW TO GENERATE SUBTEXT:
+  1. Identify the REAL emotion of the moment (anxiety)
+  2. Find a DISPLACEMENT ACTIVITY (something physical that expresses it indirectly)
+     anxiety → organizing, cleaning, fidgeting, checking phone
+  3. Write the ACTIVITY, let reader infer the EMOTION
+
+  The reader feels smarter because they "figured it out."
+  This is what makes writing feel LITERARY vs JUVENILE.
+```
+
+### 6. VOICE CONSISTENCY (Writing Style DNA)
+
+```
+Each story has ONE narrative voice that stays consistent:
+
+FIRST PERSON PAST: "I walked into the lab that night knowing something was different."
+THIRD PERSON CLOSE: "He walked into the lab that night. Something was different."
+OMNISCIENT: "The scientist walked into his lab, unaware that this night would change everything."
+
+Voice parameters (set ONCE, maintained throughout):
+  person: first/third
+  tense: past/present
+  distance: close/omniscient
+  formality: casual/literary
+  sentence_length_mean: varies by style
+
+ONCE SET, every sentence generated MUST match these parameters.
+No accidental tense switches. No POV breaks. CONSISTENCY.
+```
+
+### 7. SURPRISE THROUGH LOGICAL INVERSION
+
+```
+Predictable writing: setup → expected outcome
+Great writing: setup → LOGICAL BUT UNEXPECTED outcome
+
+HOW:
+  1. Build expectation (scientist will succeed)
+  2. At the beat before climax, ask: "What would be logical BUT unexpected?"
+  3. The INFERENCE ENGINE can find this:
+     "time travel + success → what could go wrong LOGICALLY?"
+     → "he succeeds but discovers HE was the one who caused the problem in the first place"
+
+  This is a TWIST that's both surprising AND logical.
+  Derived from inference, not random.
+```
+
+### 8. PARAGRAPH ARCHITECTURE
+
+```
+Each paragraph has a PURPOSE and an internal arc:
+
+PARAGRAPH TYPES:
+  SCENE: Set the visual (where, when, what it looks like)
+  ACTION: Something happens (events, movement, change)
+  REFLECTION: Character processes what happened (thoughts, realizations)
+  DIALOGUE: Characters interact (reveals conflict/emotion)
+  TRANSITION: Move between scenes (time skip, location change)
+
+A good story ALTERNATES these:
+  Scene → Action → Dialogue → Reflection → Transition → Scene → Action...
+
+Never two REFLECTIONS in a row (boring).
+Never three ACTIONS in a row (exhausting).
+The RHYTHM of paragraph types creates PACING.
+```
+
+### 9. ENDING = TRANSFORMED BEGINNING
+
+```
+The most satisfying endings ECHO the opening but CHANGED:
+
+Opening: "The lab was quiet. The kind of quiet that comes before everything changes."
+Ending: "The lab was quiet again. But this time, he didn't need it to change."
+
+SAME IMAGE. DIFFERENT MEANING.
+The reader feels the CHARACTER'S GROWTH through the REPETITION.
+
+HOW:
+  1. Store the opening image/phrase
+  2. At final beat: bring it back
+  3. Change ONE key word that shows the transformation
+  4. This creates circular structure = completeness feeling
+```
+
+### 10. MULTI-THREADED NARRATIVE
+
+```
+For longer pieces (1000+ words), ONE thread is boring.
+Add a SECONDARY thread:
+
+MAIN: Scientist builds time machine
+SECONDARY: His daughter is growing up without him (he's always in the lab)
+
+These INTERSECT at the climax:
+  He uses the machine to go back — not to change science — but to be at her recital.
+
+The SECONDARY thread gives EMOTIONAL STAKES to the MAIN thread.
+
+HOW TO DERIVE SECONDARY THREAD:
+  Look at character's FLAW: "obsession over balance"
+  What does obsession COST? → relationships, health, presence
+  WHO pays the cost? → someone who loves them (family, friend)
+  This becomes the secondary thread — AUTOMATICALLY DERIVED from character psychology.
+```
+
+## Final Architecture (Complete)
+
+```
+Parse Request
+  ↓
+Build World (characters + setting + objects + vocabulary)
+  ↓
+Derive Character Psychology (want + fear + flaw + arc)
+  ↓
+Plan Arc (beats with word budgets)
+  ↓
+For each beat:
+  ├── Expand World (new elements from inference)
+  ├── Pick Paragraph Types (scene/action/dialogue/reflection)
+  ├── For each paragraph:
+  │     ├── Pick Sentence Type based on tension + mood
+  │     ├── Generate from world vocabulary + beat context
+  │     ├── Apply Sensory Layer (show don't tell)
+  │     ├── Apply Micro-Rhythm (sentence length pattern)
+  │     └── Add Subtext (displacement activities)
+  ├── Connect paragraphs (transitions, pronouns, time)
+  └── Check word budget
+  ↓
+Apply Surprise (logical inversion at climax)
+  ↓
+Apply Ending Echo (transformed beginning)
+  ↓
+Final Polish (voice consistency, vary openings, motif callbacks)
+  ↓
+OUTPUT
+```
