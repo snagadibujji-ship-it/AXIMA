@@ -139,27 +139,30 @@ class KnowledgeGraph:
 
     def _load_cse(self, path: str):
         """Load CSE format."""
-        with open(path) as f:
-            for line in f:
-                line = line.strip()
-                if '|' in line:
-                    parts = line.split('|')
-                    if len(parts) >= 3:
-                        self.add_fact(Fact(
-                            subject=parts[0].strip(),
-                            relation=parts[1].strip(),
-                            object=parts[2].strip(),
-                            source="cse"
-                        ))
-                elif ':' in line:
-                    parts = line.split(':', 1)
-                    if len(parts) == 2:
-                        self.add_fact(Fact(
-                            subject=parts[0].strip(),
-                            relation="is",
-                            object=parts[1].strip(),
-                            source="cse"
-                        ))
+        try:
+            with open(path, encoding='utf-8', errors='ignore') as f:
+                for line in f:
+                    line = line.strip()
+                    if '|' in line:
+                        parts = line.split('|')
+                        if len(parts) >= 3:
+                            self.add_fact(Fact(
+                                subject=parts[0].strip(),
+                                relation=parts[1].strip(),
+                                object=parts[2].strip(),
+                                source="cse"
+                            ))
+                    elif ':' in line and len(line) < 200:
+                        parts = line.split(':', 1)
+                        if len(parts) == 2 and len(parts[0]) < 50:
+                            self.add_fact(Fact(
+                                subject=parts[0].strip(),
+                                relation="is",
+                                object=parts[1].strip(),
+                                source="cse"
+                            ))
+        except:
+            pass  # Binary CSE files handled by knowledge_index.py instead
 
     def _load_text(self, path: str):
         """Extract facts from plain text (sentence-based)."""
