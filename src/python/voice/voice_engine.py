@@ -26,6 +26,8 @@ from voice_humanizer import Humanizer
 from voice_dna import VoiceDNA, get_voice, list_voices
 from voice_emotion import EmotionEngine
 from voice_polish import AudioPolisher
+from voice_ultra import (UltraSource, SpectralContinuity, FormantEnhancer,
+                         VoicingTrail, EmphasisEngine, WaveformDetail)
 
 
 class AximaVoice:
@@ -52,6 +54,14 @@ class AximaVoice:
         self.humanizer = Humanizer(sample_rate)
         self.emotion = EmotionEngine()
         self.polisher = AudioPolisher(sample_rate)
+
+        # ULTRA modules (close 0.3-0.5 MOS gap)
+        self.ultra_source = UltraSource(sample_rate)
+        self.spectral_cont = SpectralContinuity(sample_rate)
+        self.formant_enhancer = FormantEnhancer(sample_rate)
+        self.voicing_trail = VoicingTrail(sample_rate)
+        self.emphasis_engine = EmphasisEngine()
+        self.waveform_detail = WaveformDetail(sample_rate)
 
         # Neural backend (loaded on demand)
         self._neural = None
@@ -110,6 +120,12 @@ class AximaVoice:
 
         # Step 4: Apply radiation (lip effect)
         audio = apply_radiation(audio)
+
+        # Step 4.5: ULTRA — Formant enhancement (sharper resonances)
+        audio = self.formant_enhancer.enhance_formants(audio, sharpness=0.25)
+
+        # Step 4.6: ULTRA — Waveform micro-detail (tremor + formant-cycle sync)
+        audio = self.waveform_detail.add_pulse_detail(audio, self.f0)
 
         # Step 5: Humanize (aspiration + drift + micro-variation)
         audio = self.humanizer.humanize(audio, aspiration=0.035, 
@@ -251,16 +267,20 @@ class AximaVoice:
 
             # Generate source signal
             if seg['voiced'] and not seg['stop']:
-                # Voiced: use glottal source with F0 micro-prosody
-                # Add Perlin-style pitch variation (THE key to naturalness)
+                # Voiced: ULTRA source with rich harmonics + phase-modulated noise
                 f0_varied = f0
                 if f0 > 0:
-                    # Micro-prosody: ±3% smooth F0 variation per frame
                     t = len(audio) / self.sr
                     drift = self.humanizer._perlin_1d(t * 4.0 + 7.77)
                     f0_varied = f0 * (1.0 + drift * 0.03)
-                source = self.source.generate(dur_samples, f0_varied, self.rd,
-                                             jitter=0.004, shimmer=0.003)
+                source = self.ultra_source.generate_ultra(
+                    dur_samples, f0_varied, self.rd,
+                    jitter=0.004, shimmer=0.003,
+                    harmonic_richness=0.75,
+                    spectral_tilt=-12.0,
+                    aspiration=0.025,
+                    creak=0.02 if f0_varied < 100 else 0.0
+                )
             elif seg['fricative']:
                 # Fricative: noise source
                 if seg['voiced']:
