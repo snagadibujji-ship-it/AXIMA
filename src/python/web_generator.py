@@ -869,6 +869,11 @@ class WebBuilder:
             project.html = self._build_vanilla_html(spec)
             project.js = self._build_js(spec)
 
+        # BEYOND: Apply masterpiece layer
+        from web_beyond import get_beyond_engine
+        beyond = get_beyond_engine()
+        beyond.enhance(project)
+
         self._current_project = project
         project.history.append(f"Generated: {request}")
         return project
