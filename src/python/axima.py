@@ -255,6 +255,20 @@ class Axima:
         creator = get_creator_v3()
         return creator.create(request)
 
+    def code(self, request: str):
+        """Generate code: algorithms, full projects, explain, debug.
+        
+        Examples:
+            ax.code("binary search in python")
+            ax.code("build a todo app with React")
+            ax.code("explain: def fib(n)...")
+            ax.code("fix: TypeError...")
+        
+        Returns CodeResult with: kind, code, language, files, explanation
+        """
+        from coder import get_coder
+        return get_coder().code(request)
+
 
 # Singleton
 _instance = None
