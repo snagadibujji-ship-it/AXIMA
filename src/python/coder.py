@@ -65,6 +65,7 @@ class AximaCoderUnified:
             code("build a todo app with React")  → full project
             code("explain: def fib(n)...")        → explanation
             code("fix: TypeError...")             → debug
+            code("build a landing page for a coffee shop") → HTML page
         """
         kind, lang = self._classify(request)
 
@@ -72,6 +73,8 @@ class AximaCoderUnified:
             return self._explain(request)
         elif kind == "debug":
             return self._debug(request)
+        elif kind == "webpage":
+            return self._webpage(request)
         elif kind == "project":
             return self._project(request)
         else:
@@ -101,6 +104,17 @@ class AximaCoderUnified:
             r'\b(react|vue|svelte|next|nuxt|flask|django|express|fastapi|nest)\b.*\b(app|project|api)\b',
             r'\b(build|create)\b.*\b(with|using)\b.*\b(react|vue|flask|django|express|firebase)\b',
         ]
+
+        # WEBPAGE: single HTML page (landing page, website for X)
+        webpage_signals = [
+            r'\b(landing\s*page|web\s*page|webpage|html\s*page)\b',
+            r'\b(build|create|make|generate)\b.*\b(page|website|site)\b.*\b(for|of)\b.*\b(a|an|my)\b',
+            r'\b(website|site|page)\b.*\b(for|of)\b.*\b(coffee|restaurant|gym|salon|shop|agency|startup|portfolio|clinic)\b',
+        ]
+        for pattern in webpage_signals:
+            if re.search(pattern, req):
+                return "webpage", "html"
+
         for pattern in project_signals:
             if re.search(pattern, req):
                 return "project", ""
@@ -203,6 +217,20 @@ class AximaCoderUnified:
             language="python",
             explanation=explanation if isinstance(explanation, str) else str(explanation),
             metadata={"source": "codegen_engine"}
+        )
+
+    def _webpage(self, request: str) -> CodeResult:
+        """Generate a single-file HTML website."""
+        from web_generator import get_web_generator
+        wg = get_web_generator()
+        html = wg.generate(request)
+        return CodeResult(
+            kind="webpage",
+            code=html,
+            language="html",
+            files={"index.html": html},
+            explanation=f"Complete HTML page ({len(html)} chars). Open index.html in any browser.",
+            metadata={"source": "web_generator"}
         )
 
 
