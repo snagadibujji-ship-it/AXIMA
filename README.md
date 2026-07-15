@@ -27,11 +27,8 @@
 ║     250 laws, 12 levels, 13 solvers                              ║
 ║     From Newton to Quantum Field Theory                          ║
 ║                                                                  ║
-║  🗣️  AXIMA VOICE (Text-to-Speech)     World's First             ║
-║     Physical vocal tract simulation (22-section tube)            ║
-║     8 voices, 8 emotions, voice mixing                           ║
-║     Kelly-Lochbaum wave propagation                              ║
-║     Zero stored audio — speech from pure physics                 ║
+║  🗣️  AXIMA VOICE (Text-to-Speech)     Being rebuilt separately   ║
+║     Physical vocal tract simulation — coming back when ready     ║
 ║                                                                  ║
 ║  🧠 AXIMA BRAIN (Knowledge System)   Beats NotebookLM           ║
 ║     Ingest any document → search/quiz/flashcard/compute          ║

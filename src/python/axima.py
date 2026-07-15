@@ -210,16 +210,12 @@ class Axima:
         self._brain.ingest(text, source_name)
 
     def voices(self):
-        """List available voices."""
-        return ['atlas', 'nova', 'spark', 'sage', 'aria', 'echo', 'storm', 'whisper']
+        """Voice module removed — being rebuilt separately."""
+        return []
 
     def speak(self, text: str, voice: str = 'nova', emotion: str = 'neutral'):
-        """Generate speech (returns audio samples)."""
-        from voice.voice_engine import AximaVoice
-        v = AximaVoice(mode='physics')
-        v.use_voice(voice)
-        v.set_emotion(emotion)
-        return v.speak(text)
+        """Voice module removed — being rebuilt separately."""
+        return []
 
 
 # Singleton

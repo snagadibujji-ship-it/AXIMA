@@ -4,7 +4,7 @@
 ║                    AXIMA CLI v4.0                          ║
 ║         Zero-Parameter Intelligence Terminal               ║
 ║                                                           ║
-║  Math • Physics • Explain • Brain • Voice • 15 Languages  ║
+║  Math • Physics • Explain • Brain • Code • 15 Languages  ║
 ╚═══════════════════════════════════════════════════════════╝
 
 Usage:
