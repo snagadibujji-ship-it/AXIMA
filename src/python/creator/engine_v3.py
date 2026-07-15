@@ -69,12 +69,12 @@ class Deriver:
 
         # Derive what it can DO (from category physics)
         if cat == "person":
-            entity.can_do = ["reached for", "turned from", "watched", "held",
-                           "released", "remembered", "whispered to", "stood before",
-                           "searched for", "let go of", "chose", "refused"]
+            entity.can_do = ["reached out", "turned away", "watched",
+                           "held on", "let go", "remembered", "whispered",
+                           "stood still", "searched", "stepped back",
+                           "chose", "refused", "waited", "spoke"]
             entity.has = ["hands", "voice", "shadow", "breath", "name", "past"]
             entity.contains = ["doubt", "want", "what came before"]
-            # Persons oppose something (narrative tension)
             entity.opposes = self._find_opposition(word, all_topic_words)
 
         elif cat == "place":
@@ -201,12 +201,27 @@ class SentencePhysics:
     def render(self, event: Event, tension: float, position: int,
               total_in_beat: int, form: str, all_entities: List[Entity]) -> str:
         """Turn event into sentence based on tension + form."""
+        # Ensure action completeness
+        action = event.action
+        obj = event.object
+        
+        # If action ends with preposition, merge object INTO action
+        if re.search(r'\b(for|from|to|with|at|on|of)$', action):
+            action = f"{action} {obj}"
+            obj = event.result  # shift result into object slot
+
+        # For lyrics, use action as-is (past tense works: "I faded", "I consumed")
+        action_base = action
+
+        # Create cleaned event
+        clean = Event(event.subject, action_base if form == "song" else action, obj, event.result, event.emotion)
+
         if form == "poem":
-            return self._poetic(event, tension, position)
+            return self._poetic(clean, tension, position)
         elif form == "song":
-            return self._lyric(event, tension, position, total_in_beat)
+            return self._lyric(clean, tension, position, total_in_beat)
         else:
-            return self._prose(event, tension, position, total_in_beat, all_entities)
+            return self._prose(clean, tension, position, total_in_beat, all_entities)
 
     def _prose(self, event: Event, tension: float, pos: int,
               total: int, entities: List[Entity]) -> str:
@@ -224,6 +239,15 @@ class SentencePhysics:
         else:
             o_full = o
 
+        # Build "subject action object" phrase naturally
+        # Some actions are intransitive (watched, refused) — don't need object after them
+        intransitive = ('watched', 'refused', 'waited', 'spoke', 'let go',
+                       'stood still', 'stepped back', 'turned away', 'reached out')
+        if a in intransitive:
+            s_a_o = f"{s_full} {a}"
+        else:
+            s_a_o = f"{s_full} {a} {o_full}"
+
         # Use content-hash for variety (never same pattern twice in a row)
         h = (hash(f"{s}{a}{o}{r}{pos}{tension}") % 997) + pos * 3
 
@@ -238,42 +262,42 @@ class SentencePhysics:
                 f"{s_cap}.",
                 f"And then — {a}.",
                 f"{o_full.capitalize()}. {r.capitalize()}.",
-                f"No. {s_cap} {a}.",
+                f"No. {s_a_o.capitalize()}.",
                 f"{r.capitalize()}.",
-                f"It was done. {s_cap} {a} {o_full}.",
+                f"It was done. {s_a_o.capitalize()}.",
                 f"Everything after this would be different.",
             ]
         elif tension > 0.6:
             # RISING: compound, building, urgency
             options = [
-                f"{s_cap} {a} {o_full}, and for a moment {r}.",
-                f"Something about {o_full} told {s_full} everything — {r}.",
+                f"{s_a_o.capitalize()}, and for a moment — {r}.",
+                f"Something about {o_full} told {s_full} everything.",
                 f"There was no going back. {s_cap} {a}.",
-                f"{s_cap} {a} {o_full}. Not because it was right. Because {r}.",
-                f"{o_full.capitalize()} {r}, and {s_full} knew.",
-                f"Before thinking, before choosing, {s_full} {a}.",
-                f"It was happening. {s_cap} could feel it — {o_full} was changing.",
+                f"{s_a_o.capitalize()}. Not because it was right. Because it was time.",
+                f"{o_full.capitalize()} changed, and {s_full} knew.",
+                f"Before thinking, before choosing — {s_full} {a}.",
+                f"It was happening. {s_cap} could feel it.",
             ]
         elif tension > 0.3:
             # MIDDLE: observation, building detail
             options = [
-                f"{s_cap} {a} {o_full}, the way one does when nothing else remains.",
+                f"{s_a_o.capitalize()}, the way one does when nothing else remains.",
                 f"There was something about {o_full} that made {s_full} pause.",
                 f"{o_full.capitalize()} had always been there. {s_cap} just hadn't noticed before.",
                 f"{s_cap} thought about {o_full}. About what it meant.",
-                f"In the quiet, {s_full} {a}. {o_full.capitalize()} waited.",
-                f"It was the kind of {r} that demanded attention. And {s_full} gave it.",
+                f"In the quiet, {s_full} {a}. And {o_full} waited.",
+                f"It was the kind of {o_full} that demanded attention. And {s_full} gave it.",
             ]
         else:
             # OPENING / STILLNESS: atmospheric, establishing
             options = [
                 f"In the space where {o_full} meets silence, {s_full} {a}.",
                 f"{s_cap} sat with {o_full} for what felt like hours.",
-                f"There was nothing urgent about it. {s_cap} {a} {o_full}, slowly.",
+                f"There was nothing urgent about it. {s_a_o.capitalize()}, slowly.",
                 f"The world was quiet here. {s_cap} {a}, and {o_full} remained.",
                 f"It began like this: {s_full} and {o_full}, together in the stillness.",
-                f"Nobody would have noticed. {s_cap} {a} {o_full}, and the day continued.",
-                f"Outside, the world moved. Here, {s_full} {a} {o_full}. Slowly.",
+                f"Nobody would have noticed. {s_a_o.capitalize()}, and the day continued.",
+                f"Outside, the world moved. Here, {s_full} {a}.",
             ]
 
         return options[h % len(options)]
@@ -301,8 +325,17 @@ class SentencePhysics:
     def _lyric(self, event: Event, tension: float, pos: int, total: int) -> str:
         s, a, o, r = event.subject, event.action, event.object, event.result
 
-        # For lyrics, strip tense markers from actions for cleaner phrasing
-        a_base = re.sub(r'(ed|ing)$', '', a) if len(a) > 4 else a
+        # For lyrics, create base form for "could X" / "would never X" patterns
+        # Only strip -ed/-ing if the result is still 4+ chars
+        a_base = a
+        if len(a) > 6 and a.endswith('ed'):
+            candidate = a[:-2]
+            if len(candidate) >= 4:
+                a_base = candidate
+        elif len(a) > 6 and a.endswith('ing'):
+            candidate = a[:-3]
+            if len(candidate) >= 4:
+                a_base = candidate
 
         if tension > 0.7:
             # Chorus energy: repetition, hook
@@ -386,17 +419,19 @@ class NarrativeEngine:
     def _song(self, target: int, entities: List[Entity]) -> List[Dict]:
         concept = next((e for e in entities if e.category == "concept"),
                       entities[0] if entities else Entity("this", "concept"))
+        # Different focus per section for variety
+        alt_focus = entities[-1].name if len(entities) > 1 else "you"
         return [
             {"tension": 0.3, "words": target // 5, "focus": "I", "against": concept.name,
              "purpose": "scene before"},
-            {"tension": 0.8, "words": target // 5, "focus": "I", "against": concept.name,
+            {"tension": 0.8, "words": target // 5, "focus": concept.name, "against": "",
              "purpose": "emotional truth"},
-            {"tension": 0.4, "words": target // 5, "focus": "I", "against": concept.name,
+            {"tension": 0.5, "words": target // 5, "focus": alt_focus, "against": concept.name,
              "purpose": "story deepens"},
-            {"tension": 0.8, "words": target // 5, "focus": "I", "against": concept.name,
-             "purpose": "truth again, heavier"},
+            {"tension": 0.85, "words": target // 5, "focus": concept.name, "against": "I",
+             "purpose": "truth hits harder"},
             {"tension": 0.9, "words": target // 5, "focus": "I", "against": concept.name,
-             "purpose": "shift perspective"},
+             "purpose": "final revelation"},
         ]
 
     def _poem(self, target: int, entities: List[Entity]) -> List[Dict]:
@@ -418,16 +453,18 @@ class NarrativeEngine:
         focus = beat["focus"]
         against = beat["against"]
 
-        # Estimate events needed (~12 words per rendered event)
-        num_events = max(4, word_budget // 12)
+        # Estimate events needed (~12 words per rendered event, overshoot for dedup)
+        num_events = max(6, (word_budget // 10) + 4)
+
+        # Track used action+object combos to prevent repetition
+        used_combos = set()
 
         for i in range(num_events):
             # Alternate between focus entity and opposition
             if i % 3 == 0 and against:
-                # Opposition acts
                 opp_entity = next((e for e in entities if e.name == against), None)
                 if opp_entity:
-                    ev = deriver.derive_event(opp_entity, tension, beat.get("purpose", ""))
+                    ev = self._derive_unique_event(opp_entity, tension, beat.get("purpose", ""), i, used_combos)
                     events.append(ev)
                     continue
 
@@ -438,37 +475,40 @@ class NarrativeEngine:
 
             # Vary tension within beat (builds toward end)
             local_t = tension * (0.6 + 0.4 * (i / max(1, num_events - 1)))
-            ev = deriver.derive_event(focus_entity, local_t, beat.get("purpose", ""))
+            ev = self._derive_unique_event(focus_entity, local_t, beat.get("purpose", ""), i, used_combos)
             events.append(ev)
 
         return events
 
-    def derive_event(self, entity: Entity, tension: float, purpose: str) -> Event:
-        """Derive an event from entity state + tension level."""
+    def _derive_unique_event(self, entity: Entity, tension: float, purpose: str, iteration: int, used: set) -> Event:
+        """Derive event ensuring no repeated action+object combo."""
         n_actions = len(entity.can_do)
         n_has = len(entity.has)
         n_like = len(entity.is_like)
         n_contains = len(entity.contains)
 
-        # Pick action based on tension (higher tension = earlier/more intense actions)
-        idx = int(tension * (n_actions - 1)) if n_actions > 0 else 0
-        action = entity.can_do[idx] if entity.can_do else "moved"
+        # Try different action indices until we find unused combo
+        for attempt in range(n_actions + 3):
+            idx = (int(tension * (n_actions - 1)) + iteration + attempt) % max(1, n_actions)
+            action = entity.can_do[idx] if entity.can_do else "moved"
 
-        # Pick object from what entity HAS or IS LIKE
-        if tension > 0.7 and n_like > 0:
-            obj = entity.is_like[int(tension * 10) % n_like]
-        elif n_has > 0:
-            obj = entity.has[int(tension * 7) % n_has]
-        else:
-            obj = entity.name
+            # Pick object — cycle through ALL available material
+            obj_pool = entity.has + entity.is_like + entity.contains
+            if not obj_pool:
+                obj_pool = [entity.name]
+            obj_idx = (iteration + attempt * 3) % len(obj_pool)
+            obj = obj_pool[obj_idx]
 
-        # Result from what entity CONTAINS or its opposition
-        if tension > 0.8 and entity.opposes:
-            result = entity.opposes
-        elif n_contains > 0:
-            result = entity.contains[int(tension * 5) % n_contains]
-        else:
-            result = "something changed"
+            combo = f"{entity.name}:{action}:{obj}"
+            if combo not in used:
+                used.add(combo)
+                break
+
+        # Result — also varied
+        result_pool = entity.contains + [entity.opposes] if entity.opposes else entity.contains
+        if not result_pool:
+            result_pool = ["something changed"]
+        result = result_pool[(iteration + int(tension * 10)) % len(result_pool)]
 
         return Event(entity.name, action, obj, result, purpose)
 
@@ -499,9 +539,15 @@ class CreatorV3:
         for beat_idx, beat in enumerate(arc):
             events = self.narrative.generate_events(beat, entities, self.narrative)
             sentences = []
+            used_patterns = set()
             for ev_idx, event in enumerate(events):
                 sent = self.physics.render(event, beat["tension"], ev_idx,
                                           len(events), form, entities)
+                # Deduplicate: skip if first 5 words already used
+                key = ' '.join(sent.split()[:5])
+                if key in used_patterns:
+                    continue
+                used_patterns.add(key)
                 sentences.append(sent)
 
             if form in ("poem", "song"):
